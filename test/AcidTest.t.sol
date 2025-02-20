@@ -2,17 +2,16 @@
 pragma solidity ^0.8.28;
 
 import "forge-std/Test.sol";
-import {AcidTestV3} from "../src/AcidTestPriceFeed.sol";
+import {AcidTest} from "../src/AcidTest.sol";
 import {IERC20} from "openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {AggregatorV3Interface} from "../src/interfaces/AggregatorV3Interface.sol";
 import {ERC20} from "openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {IERC20Errors} from "openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 
 contract MockERC is ERC20 {    
-
-    constructor(string memory name_, string memory symbol_) ERC20(name_, symbol_) {
-    }
-
+    constructor(string memory name_, string memory symbol_) 
+        ERC20(name_, symbol_)
+    {}
 }
 
 /// @notice A simple aggregator mock that always returns 2692480000 as the price
@@ -32,11 +31,11 @@ contract MockAggregator {
 
 // Attacker contract to test reentrancy protection on mint function.
 contract ReentrantAttacker {
-    AcidTestV3 public acidTest;
+    AcidTest public acidTest;
     uint256 public attackCount;
     
     constructor(address payable _acidTest) {
-        acidTest = AcidTestV3(_acidTest);
+        acidTest = AcidTest(_acidTest);
     }
     
     function attack(uint256 tokenId) external payable {
@@ -51,9 +50,9 @@ contract ReentrantAttacker {
     }
 }
 
-/// @notice Tests for the AcidTestV3 contract.
-contract AcidTestV3Test is Test {
-    AcidTestV3 public acidTest;
+/// @notice Tests for the AcidTest contract.
+contract AcidTestTest is Test {
+    AcidTest public acidTest;
     MockERC public usdc;
     MockERC public weth;
     MockAggregator public aggregator;
@@ -78,9 +77,9 @@ contract AcidTestV3Test is Test {
         weth = new MockERC("Wrapped Ether", "WETH");
         aggregator = new MockAggregator();
         
-        // Deploy the AcidTestV3 contract
+        // Deploy the AcidTest contract
         vm.prank(owner);
-        acidTest = new AcidTestV3(
+        acidTest = new AcidTest(
             address(usdc),
             address(weth),
             owner,
@@ -114,7 +113,7 @@ contract AcidTestV3Test is Test {
     }
 
     function test_TokenCreation() public view {
-        AcidTestV3.TokenInfo memory info = acidTest.getTokenInfo(1);
+        AcidTest.TokenInfo memory info = acidTest.getTokenInfo(1);
         assertEq(info.salesStartDate, uint24(block.timestamp));
         assertEq(info.salesExpirationDate, uint24(block.timestamp + 1 days));
         assertEq(info.usdPrice, TOKEN_PRICE);
@@ -179,10 +178,10 @@ contract AcidTestV3Test is Test {
         
         vm.startPrank(user);
         // Try to mint with insufficient ETH - send a small amount to trigger ETH path
-        vm.expectRevert(abi.encodeWithSelector(AcidTestV3.CannotSendETHWithWETH.selector));
+        vm.expectRevert(abi.encodeWithSelector(AcidTest.CannotSendETHWithWETH.selector));
         acidTest.mint{value: minRequiredEth / 2}(user, 1, amount, true);  // isWeth is true
 
-        vm.expectRevert(abi.encodeWithSelector(AcidTestV3.InsufficientPayment.selector, minRequiredEth, minRequiredEth / 2));
+        vm.expectRevert(abi.encodeWithSelector(AcidTest.InsufficientPayment.selector, minRequiredEth, minRequiredEth / 2));
         acidTest.mint{value: minRequiredEth / 2}(user, 1, amount, false); // isWeth is false
         vm.stopPrank();
     }
@@ -240,7 +239,7 @@ contract AcidTestV3Test is Test {
         );
         
         vm.prank(user);
-        vm.expectRevert(abi.encodeWithSelector(AcidTestV3.SalesNotActive.selector, 2));
+        vm.expectRevert(abi.encodeWithSelector(AcidTest.SalesNotActive.selector, 2));
         acidTest.mint(user, 2, 1, false);
     }
     
@@ -250,7 +249,7 @@ contract AcidTestV3Test is Test {
         vm.warp(block.timestamp + 2 days);
         
         vm.prank(user);
-        vm.expectRevert(abi.encodeWithSelector(AcidTestV3.SalesNotActive.selector, 1));
+        vm.expectRevert(abi.encodeWithSelector(AcidTest.SalesNotActive.selector, 1));
         acidTest.mint(user, 1, 1, false);
     }
 
@@ -301,7 +300,7 @@ contract AcidTestV3Test is Test {
         vm.prank(owner);
         acidTest.modifyTokenInfo(1, newStartDate, newEndDate, newPrice, newUri);
         
-        AcidTestV3.TokenInfo memory info = acidTest.getTokenInfo(1);
+        AcidTest.TokenInfo memory info = acidTest.getTokenInfo(1);
         assertEq(info.salesStartDate, newStartDate);
         assertEq(info.salesExpirationDate, newEndDate);
         assertEq(info.usdPrice, newPrice);

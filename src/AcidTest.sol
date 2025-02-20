@@ -7,7 +7,7 @@ import {IERC20} from "openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {AggregatorV3Interface} from "./interfaces/AggregatorV3Interface.sol";
 import {ReentrancyGuard} from "openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract AcidTestV3 is ERC1155, Ownable, ReentrancyGuard {
+contract AcidTest is ERC1155, Ownable, ReentrancyGuard {
 
     error SalesNotActive(uint256 tokenId);
     error NotEnoughUSD();
