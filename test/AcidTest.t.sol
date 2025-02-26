@@ -90,8 +90,8 @@ contract AcidTestTest is Test {
         // Create a token on sale (tokenId will be 1)
         vm.prank(owner);
         acidTest.create(
-            uint24(block.timestamp),             // salesStartDate
-            uint24(block.timestamp + 1 days),    // salesExpirationDate
+            uint32(block.timestamp),             // salesStartDate
+            uint32(block.timestamp + 1 days),    // salesExpirationDate
             uint208(TOKEN_PRICE),                // usdPrice ($1)
             "ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/1"        // tokenUri
         );
@@ -114,8 +114,8 @@ contract AcidTestTest is Test {
 
     function test_TokenCreation() public view {
         AcidTest.TokenInfo memory info = acidTest.getTokenInfo(1);
-        assertEq(info.salesStartDate, uint24(block.timestamp));
-        assertEq(info.salesExpirationDate, uint24(block.timestamp + 1 days));
+        assertEq(info.salesStartDate, uint32(block.timestamp));
+        assertEq(info.salesExpirationDate, uint32(block.timestamp + 1 days));
         assertEq(info.usdPrice, TOKEN_PRICE);
         assertEq(info.uri, "ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/1");
     }
@@ -126,8 +126,8 @@ contract AcidTestTest is Test {
         vm.prank(user);
         vm.expectRevert();
         acidTest.create(
-            uint24(block.timestamp),             // salesStartDate
-            uint24(block.timestamp + 1 days),    // salesExpirationDate
+            uint32(block.timestamp),             // salesStartDate
+            uint32(block.timestamp + 1 days),    // salesExpirationDate
             uint208(TOKEN_PRICE),                // usdPrice ($1 in 18 decimals)
             "ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/1"        // tokenUri
         );
@@ -232,8 +232,8 @@ contract AcidTestTest is Test {
         // Create a new token (tokenId 2) with a future start date.
         vm.prank(owner);
         acidTest.create(
-            uint24(block.timestamp + 1 hours),
-            uint24(block.timestamp + 2 hours),
+            uint32(block.timestamp + 1 hours),
+            uint32(block.timestamp + 2 hours),
             uint208(TOKEN_PRICE),
             "ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/2"
         );
@@ -277,23 +277,23 @@ contract AcidTestTest is Test {
         for (uint i=2; i < 11; i++) {
             vm.prank(owner);
             acidTest.create(
-                uint24(block.timestamp),
-                uint24(block.timestamp + 1 days),
+                uint32(block.timestamp),
+                uint32(block.timestamp + 1 days),
                 uint208(TOKEN_PRICE),   
                 "ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/n"
             );
         }
         for (uint i=2; i <11; i++){
-            assertEq(acidTest.getTokenInfo(i).salesStartDate, uint24(block.timestamp));
-            assertEq(acidTest.getTokenInfo(i).salesExpirationDate, uint24(block.timestamp + 1 days));
+            assertEq(acidTest.getTokenInfo(i).salesStartDate, uint32(block.timestamp));
+            assertEq(acidTest.getTokenInfo(i).salesExpirationDate, uint32(block.timestamp + 1 days));
             assertEq(acidTest.getTokenInfo(i).usdPrice, TOKEN_PRICE);
             assertEq(acidTest.getTokenInfo(i).uri, "ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/n");      
         }
     }
 
     function test_ModifyTokenInfo() public {
-        uint24 newStartDate = uint24(block.timestamp + 1 days);
-        uint24 newEndDate = uint24(block.timestamp + 2 days);
+        uint32 newStartDate = uint32(block.timestamp + 1 days);
+        uint32 newEndDate = uint32(block.timestamp + 2 days);
         uint208 newPrice = uint208(TOKEN_PRICE * 2); // Explicit casting
         string memory newUri = "ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/1/updated";
 
