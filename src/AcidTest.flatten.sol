@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0 ^0.8.20 ^0.8.28;
 
-// src/AcidTest.sol
-
-// src/AcidTest.flatten.sol
-
 // src/interfaces/AggregatorV3Interface.sol
 
 // solhint-disable-next-line interface-starts-with-i
@@ -3914,8 +3910,8 @@ contract AcidTest is ERC1155, Ownable, ReentrancyGuard {
     AggregatorV3Interface public aggregatorV3;
 
     struct TokenInfo {
-        uint24 salesStartDate;
-        uint24 salesExpirationDate;
+        uint32 salesStartDate;
+        uint32 salesExpirationDate;
         uint208 usdPrice;
         string uri;
     }
@@ -3946,8 +3942,8 @@ contract AcidTest is ERC1155, Ownable, ReentrancyGuard {
     ////////////////////////////////////////////////
 
     function create(
-        uint24 salesStartDate,
-        uint24 salesExpirationDate, 
+        uint32 salesStartDate,
+        uint32 salesExpirationDate, 
         uint208 usdPrice,
         string memory tokenUri
     ) public onlyOwner{
@@ -3964,8 +3960,8 @@ contract AcidTest is ERC1155, Ownable, ReentrancyGuard {
 
     
     function modifyTokenInfo(uint256 tokenId,
-        uint24 salesStartDate,
-        uint24 salesExpirationDate,
+        uint32 salesStartDate,
+        uint32 salesExpirationDate,
         uint208 usdPrice,
         string memory tokenUri
     ) public onlyOwner{
