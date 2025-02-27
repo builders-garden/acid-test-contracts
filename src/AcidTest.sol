@@ -23,7 +23,7 @@ contract AcidTest is ERC1155, Ownable, ReentrancyGuard {
 
     IERC20 public immutable usdc;
     IERC20 public immutable weth;
-    uint internal idCounter;
+    uint public idCounter;
     address public receiverAddress;
     mapping (uint id=>TokenInfo) public s_tokenInfo;
    
@@ -68,7 +68,7 @@ contract AcidTest is ERC1155, Ownable, ReentrancyGuard {
         uint32 salesExpirationDate, 
         uint208 usdPrice,
         string memory tokenUri
-    ) public onlyOwner{
+    ) public /** onlyOwner */{
         ++idCounter;
         s_tokenInfo[idCounter] = TokenInfo({
             salesStartDate: salesStartDate,
@@ -86,7 +86,7 @@ contract AcidTest is ERC1155, Ownable, ReentrancyGuard {
         uint32 salesExpirationDate,
         uint208 usdPrice,
         string memory tokenUri
-    ) public onlyOwner{
+    ) public /** onlyOwner */{
         s_tokenInfo[tokenId] = TokenInfo({
             salesStartDate: salesStartDate,
             salesExpirationDate: salesExpirationDate,
@@ -97,7 +97,7 @@ contract AcidTest is ERC1155, Ownable, ReentrancyGuard {
         emit TokenModified(tokenId, s_tokenInfo[tokenId]);
     }
     
-    function setReceiverAddress(address _receiverAddress) public onlyOwner{
+    function setReceiverAddress(address _receiverAddress) public /** onlyOwner */{
         if (_receiverAddress == address(0)) revert InvalidReceiverAddress();
         receiverAddress = _receiverAddress;
     }
@@ -165,4 +165,15 @@ contract AcidTest is ERC1155, Ownable, ReentrancyGuard {
     function getTokenInfo(uint256 tokenId) public view returns (TokenInfo memory) {
         return s_tokenInfo[tokenId];
     }
+
+
+    function getTokenInfos(uint128 startIndex, uint128 endIndex) public view returns (TokenInfo[] memory) {
+        TokenInfo[] memory tokenInfos = new TokenInfo[](endIndex - startIndex + 1);
+        if (endIndex > idCounter) endIndex = uint128(idCounter);
+        for (uint128 i = startIndex; i <= endIndex; i++) {
+            tokenInfos[i - startIndex] = s_tokenInfo[i];
+        }
+        return tokenInfos;
+    }
+
 }       

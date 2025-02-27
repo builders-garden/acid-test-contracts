@@ -336,4 +336,35 @@ contract AcidTestTest is Test {
         
         assertEq(acidTest.balanceOf(address(attacker), 1), 0);
     }
+
+    function test_GetTokenInfos() public {
+    // Create multiple tokens directly in the test
+    for (uint i = 1; i <= 5; i++) {
+        vm.prank(owner);
+        acidTest.create(
+            uint32(block.timestamp),             // salesStartDate
+            uint32(block.timestamp + 1 days),    // salesExpirationDate
+            uint208(TOKEN_PRICE * i),            // usdPrice ($1, $2, $3, ...)
+            string(abi.encodePacked("ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/", i)) // tokenUri
+        );
+    }
+
+    // Retrieve token infos for token IDs 1 to 5
+    AcidTest.TokenInfo[] memory tokenInfos = acidTest.getTokenInfos(2, 6);
+
+    // Check the length of the returned array
+    assertEq(tokenInfos.length, 5);
+
+    // Verify the details of each token
+    for (uint i = 1; i <= 5; i++) {
+        // Print actual values for debugging
+        console.log("Expected URI:", string(abi.encodePacked("ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/", i)));
+        console.log("Actual URI:", tokenInfos[i - 1].uri);
+
+        assertEq(tokenInfos[i - 1].salesStartDate, uint32(block.timestamp));
+        assertEq(tokenInfos[i - 1].salesExpirationDate, uint32(block.timestamp + 1 days));
+        assertEq(tokenInfos[i - 1].usdPrice, uint208(TOKEN_PRICE * i));
+        assertEq(tokenInfos[i - 1].uri, string(abi.encodePacked("ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/", i)));
+    }
+}
 }
