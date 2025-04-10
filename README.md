@@ -1,5 +1,6 @@
 ## Foundry
 
+
 **Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
 
 Foundry consists of:
@@ -48,7 +49,10 @@ $ anvil
 ### Deploy
 
 ```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+$ OWNER_ADDRESS=<OWNER_ADDRESS> RECEIVER_ADDRESS=<RECEIVER_ADDRESS> \ 
+forge script script/AcidTestDeployer.sol:AcidTestDeployer \
+--fork-url https://mainnet.base.org \
+--private-key <PRIVATE_KEY> --broadcast
 ```
 
 ### Cast
