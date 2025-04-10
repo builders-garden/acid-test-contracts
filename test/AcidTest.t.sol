@@ -7,6 +7,7 @@ import {IERC20} from "openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {AggregatorV3Interface} from "../src/interfaces/AggregatorV3Interface.sol";
 import {ERC20} from "openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {IERC20Errors} from "openzeppelin/contracts/interfaces/draft-IERC6093.sol";
+import {Ownable} from "openzeppelin/contracts/access/Ownable.sol";
 
 contract MockERC is ERC20 {    
     constructor(string memory name_, string memory symbol_) 
@@ -16,8 +17,8 @@ contract MockERC is ERC20 {
 
 /// @notice A simple aggregator mock that always returns 2692480000 as the price
 contract MockAggregator {
-    int256 public constant ANSWER = 2692480000;
-
+    int256 public constant ANSWER = 1593_480000;
+    
     function latestRoundData() external view  returns (
         uint80 roundId,
         int256 answer,
@@ -152,13 +153,17 @@ contract AcidTestTest is Test {
     function test_MintWithETH() public {
         uint256 amount = 1;
         (, int256 answer, , ,) = aggregator.latestRoundData();
-        uint256 ethToOneDollar = 1e26 / uint256(answer);
+        uint256 ethToOneDollar = 1e24 / uint256(answer);
         // Calculate required ETH amount with better precision
-        uint256 requiredEth = (uint256(TOKEN_PRICE) * amount * 1e26) / uint256(answer) / 1e6;
+        uint256 requiredEth = (uint256(TOKEN_PRICE) * amount * 1e24) / uint256(answer) / 1e6;
         
         // Calculate minimum required ETH (99% of required amount due to slippage)
         uint256 minRequiredEth = (requiredEth * 99) / 100;
         
+        // Log the amount in USDC
+        console.log("Amount in USDC:", TOKEN_PRICE * amount);
+        console.log("Required ETH:", requiredEth);
+
         vm.startPrank(user);
         // Send exactly the required amount
         acidTest.mint{value: requiredEth}(user, 1, amount, false);
@@ -172,7 +177,7 @@ contract AcidTestTest is Test {
     function test_RevertInsufficientETHPayment() public {
         uint256 amount = 1;
         (, int256 answer, , ,) = aggregator.latestRoundData();
-        uint256 ethToOneDollar = 1e26 / uint256(answer);
+        uint256 ethToOneDollar = 1e24 / uint256(answer);
         uint256 requiredEth = (TOKEN_PRICE * amount * ethToOneDollar) / 1e6;
         uint256 minRequiredEth = (requiredEth * 99) / 100; // 1% slippage allowance
         
@@ -190,7 +195,7 @@ contract AcidTestTest is Test {
     function test_MintWithETHRefund() public {
         uint256 amount = 1;
         (, int256 answer, , ,) = aggregator.latestRoundData();
-        uint256 ethToOneDollar = 1e26 / uint256(answer);
+        uint256 ethToOneDollar = 1e24 / uint256(answer);
         uint256 requiredEth = (TOKEN_PRICE * amount * ethToOneDollar) / 1e6;
         
         // Send extra ETH so that a refund is triggered.
@@ -205,15 +210,11 @@ contract AcidTestTest is Test {
         assertEq(address(acidTest.receiverAddress()).balance, requiredEth);
         // (Note: Due to gas costs, checking the user's balance exactly is not reliable in tests.)
     }
-
-
-    
-
   
     function test_MintWithWETH() public {
         uint256 amount = 3;
         (, int256 answer, , ,) = aggregator.latestRoundData();
-        uint256 ethToOneDollar = 1e26 / uint256(answer);
+        uint256 ethToOneDollar = 1e24 / uint256(answer);
         // Adjust for 18 decimals
         uint256 requiredWeth = (TOKEN_PRICE * amount * ethToOneDollar) / 1e6;
         
@@ -338,33 +339,53 @@ contract AcidTestTest is Test {
     }
 
     function test_GetTokenInfos() public {
-    // Create multiple tokens directly in the test
-    for (uint i = 1; i <= 5; i++) {
+        // Create multiple tokens directly in the test
+        for (uint i = 1; i <= 5; i++) {
+            vm.prank(owner);
+            acidTest.create(
+                uint32(block.timestamp),             // salesStartDate
+                uint32(block.timestamp + 1 days),    // salesExpirationDate
+                uint208(TOKEN_PRICE * i),            // usdPrice ($1, $2, $3, ...)
+                string(abi.encodePacked("ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/", i)) // tokenUri
+            );
+        }
+
+        // Retrieve token infos for token IDs 1 to 5
+        AcidTest.TokenInfo[] memory tokenInfos = acidTest.getTokenInfos(2, 6);
+
+        // Check the length of the returned array
+        assertEq(tokenInfos.length, 5);
+
+        // Verify the details of each token
+        for (uint i = 1; i <= 5; i++) {
+            // Print actual values for debugging
+            console.log("Expected URI:", string(abi.encodePacked("ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/", i)));
+            console.log("Actual URI:", tokenInfos[i - 1].uri);
+
+            assertEq(tokenInfos[i - 1].salesStartDate, uint32(block.timestamp));
+            assertEq(tokenInfos[i - 1].salesExpirationDate, uint32(block.timestamp + 1 days));
+            assertEq(tokenInfos[i - 1].usdPrice, uint208(TOKEN_PRICE * i));
+            assertEq(tokenInfos[i - 1].uri, string(abi.encodePacked("ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/", i)));
+        }
+    }
+
+    function test_TransferOwnership() public {
+        // Check initial owner
+        assertEq(acidTest.owner(), owner);
+        address newOwner = address(123);
+        // Transfer ownership to newOwner
         vm.prank(owner);
-        acidTest.create(
-            uint32(block.timestamp),             // salesStartDate
-            uint32(block.timestamp + 1 days),    // salesExpirationDate
-            uint208(TOKEN_PRICE * i),            // usdPrice ($1, $2, $3, ...)
-            string(abi.encodePacked("ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/", i)) // tokenUri
-        );
+        acidTest.transferOwnership(newOwner);
+
+        // Check new owner
+        assertEq(acidTest.owner(), newOwner);
     }
 
-    // Retrieve token infos for token IDs 1 to 5
-    AcidTest.TokenInfo[] memory tokenInfos = acidTest.getTokenInfos(2, 6);
-
-    // Check the length of the returned array
-    assertEq(tokenInfos.length, 5);
-
-    // Verify the details of each token
-    for (uint i = 1; i <= 5; i++) {
-        // Print actual values for debugging
-        console.log("Expected URI:", string(abi.encodePacked("ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/", i)));
-        console.log("Actual URI:", tokenInfos[i - 1].uri);
-
-        assertEq(tokenInfos[i - 1].salesStartDate, uint32(block.timestamp));
-        assertEq(tokenInfos[i - 1].salesExpirationDate, uint32(block.timestamp + 1 days));
-        assertEq(tokenInfos[i - 1].usdPrice, uint208(TOKEN_PRICE * i));
-        assertEq(tokenInfos[i - 1].uri, string(abi.encodePacked("ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/", i)));
+    function test_TransferOwnership_NotOwner() public {
+        address newOwner = address(123);
+        // Attempt to transfer ownership from a non-owner account
+        vm.prank(newOwner);
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, newOwner));
+        acidTest.transferOwnership(newOwner);
     }
-}
 }

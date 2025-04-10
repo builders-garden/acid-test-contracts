@@ -15,7 +15,7 @@ contract AcidTestTest is Script, ContractAddresses {
         /* TODO: add a more secure way to get the private key */ 
         vm.startBroadcast();
         
-        bool isTestnet = true;
+        bool isTestnet = false;
         
         if (isTestnet) {
             new AcidTest(USDC_BASE_SEPOLIA, WETH_BASE_SEPOLIA, msg.sender, AGGREGATOR_V3_BASE_SEPOLIA, msg.sender);

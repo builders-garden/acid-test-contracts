@@ -18,15 +18,13 @@ contract AcidTest is ERC1155, Ownable, ReentrancyGuard {
 
     event TokenCreated(uint256 tokenId, TokenInfo tokenInfo);
     event TokenModified(uint256 tokenId, TokenInfo tokenInfo);
-    event TokenMinted(address to, uint256 tokenId, uint256 amount, bool isWeth);
-
-
+    
     IERC20 public immutable usdc;
     IERC20 public immutable weth;
     uint public idCounter;
     address public receiverAddress;
     mapping (uint id=>TokenInfo) public s_tokenInfo;
-   
+    string public name = "Acid Test";
  
     AggregatorV3Interface public aggregatorV3;
 
@@ -68,7 +66,7 @@ contract AcidTest is ERC1155, Ownable, ReentrancyGuard {
         uint32 salesExpirationDate, 
         uint208 usdPrice,
         string memory tokenUri
-    ) public /** onlyOwner */{
+    ) public onlyOwner {
         ++idCounter;
         s_tokenInfo[idCounter] = TokenInfo({
             salesStartDate: salesStartDate,
@@ -86,18 +84,18 @@ contract AcidTest is ERC1155, Ownable, ReentrancyGuard {
         uint32 salesExpirationDate,
         uint208 usdPrice,
         string memory tokenUri
-    ) public /** onlyOwner */{
+    ) public onlyOwner {
         s_tokenInfo[tokenId] = TokenInfo({
             salesStartDate: salesStartDate,
             salesExpirationDate: salesExpirationDate,
             usdPrice: usdPrice,
             uri: tokenUri   
         }); 
-
+        
         emit TokenModified(tokenId, s_tokenInfo[tokenId]);
     }
     
-    function setReceiverAddress(address _receiverAddress) public /** onlyOwner */{
+    function setReceiverAddress(address _receiverAddress) public onlyOwner {
         if (_receiverAddress == address(0)) revert InvalidReceiverAddress();
         receiverAddress = _receiverAddress;
     }
@@ -121,7 +119,7 @@ contract AcidTest is ERC1155, Ownable, ReentrancyGuard {
         
         // Calculate ETH amount once for both paths
         (, int answer,,,) = aggregatorV3.latestRoundData();
-        uint256 ethToOneDollar = 1e26 / uint256(answer);
+        uint256 ethToOneDollar = 1e24 / uint256(answer);
         uint256 requiredEth = (uint256(tokenInfo.usdPrice) * amount * ethToOneDollar) / 1e6;
         
         // Handle payment validation
@@ -175,5 +173,5 @@ contract AcidTest is ERC1155, Ownable, ReentrancyGuard {
         }
         return tokenInfos;
     }
-
+    
 }       
