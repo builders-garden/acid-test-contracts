@@ -119,7 +119,7 @@ contract AcidTest is ERC1155, Ownable, ReentrancyGuard {
         
         // Calculate ETH amount once for both paths
         (, int answer,,,) = aggregatorV3.latestRoundData();
-        uint256 ethToOneDollar = 1e24 / uint256(answer);
+        uint256 ethToOneDollar = 1e26 / uint256(answer);
         uint256 requiredEth = (uint256(tokenInfo.usdPrice) * amount * ethToOneDollar) / 1e6;
         
         // Handle payment validation

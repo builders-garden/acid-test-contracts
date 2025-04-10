@@ -17,7 +17,7 @@ contract MockERC is ERC20 {
 
 /// @notice A simple aggregator mock that always returns 2692480000 as the price
 contract MockAggregator {
-    int256 public constant ANSWER = 1593_480000;
+    int256 public constant ANSWER = 138255741564;
     
     function latestRoundData() external view  returns (
         uint80 roundId,
@@ -67,16 +67,22 @@ contract AcidTestTest is Test {
     uint256 public constant INITIAL_WETH_BALANCE = 1000 * 1e18; // 1000 WETH with 18 decimals
     uint256 public constant INITIAL_ETH_BALANCE = 1000 * 1e18; // 1000 ETH
     uint256 public constant TOKEN_PRICE = 1e6; // $1
+    address public constant AGGREGATOR_V3_BASE_MAINNET = 0x71041dddad3595F9CEd3DcCFBe3D1F4b0a16Bb70;
 
     function setUp() public {
-        owner = vm.addr(1);
-        receiver = vm.addr(2);
-        user = vm.addr(3);
+        owner = vm.addr(117384701234701293471023647012845787238437949884);
+        receiver = vm.addr(213287489179103947091823740712364078126304123697482);
+        user = vm.addr(1928378213982739817298312548328934136841239840192374);
         
         // Deploy mocks
         usdc = new MockERC("USD Coin", "USDC");
         weth = new MockERC("Wrapped Ether", "WETH");
-        aggregator = new MockAggregator();
+
+        if (block.chainid == 8453) {
+            aggregator =  MockAggregator(AGGREGATOR_V3_BASE_MAINNET);
+        } else {
+            aggregator = new MockAggregator();
+        }
         
         // Deploy the AcidTest contract
         vm.prank(owner);
@@ -97,7 +103,7 @@ contract AcidTestTest is Test {
             "ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/1"        // tokenUri
         );
         
-
+        
         ReentrantAttacker attacker = new ReentrantAttacker(payable(address(acidTest)));
         
         // Fund the user with USDC, WETH, and ETH
@@ -153,31 +159,32 @@ contract AcidTestTest is Test {
     function test_MintWithETH() public {
         uint256 amount = 1;
         (, int256 answer, , ,) = aggregator.latestRoundData();
-        uint256 ethToOneDollar = 1e24 / uint256(answer);
-        // Calculate required ETH amount with better precision
-        uint256 requiredEth = (uint256(TOKEN_PRICE) * amount * 1e24) / uint256(answer) / 1e6;
+        uint256 ethToOneDollar = 1e26 / uint256(answer);
+        uint256 requiredEth = (uint256(TOKEN_PRICE) * amount * ethToOneDollar) / 1e6;
         
         // Calculate minimum required ETH (99% of required amount due to slippage)
         uint256 minRequiredEth = (requiredEth * 99) / 100;
         
         // Log the amount in USDC
         console.log("Amount in USDC:", TOKEN_PRICE * amount);
-        console.log("Required ETH:", requiredEth);
 
         vm.startPrank(user);
         // Send exactly the required amount
         acidTest.mint{value: requiredEth}(user, 1, amount, false);
         vm.stopPrank();
 
-        assertEq(acidTest.balanceOf(user, 1), amount);
-        assertEq(address(acidTest.receiverAddress()).balance, requiredEth);
-        assertEq(user.balance, INITIAL_ETH_BALANCE - requiredEth * amount);
+        // Add descriptive messages to assertions
+        assertEq(acidTest.balanceOf(user, 1), amount, "User balance should match the minted amount");
+        assertEq(address(acidTest.receiverAddress()).balance, requiredEth, "Receiver balance should match the required ETH");
+        assertEq(user.balance, INITIAL_ETH_BALANCE - requiredEth * amount, "User's ETH balance should be reduced by the required ETH");
+
+        console.logUint(requiredEth);
     }
 
     function test_RevertInsufficientETHPayment() public {
         uint256 amount = 1;
         (, int256 answer, , ,) = aggregator.latestRoundData();
-        uint256 ethToOneDollar = 1e24 / uint256(answer);
+        uint256 ethToOneDollar = 1e26 / uint256(answer);
         uint256 requiredEth = (TOKEN_PRICE * amount * ethToOneDollar) / 1e6;
         uint256 minRequiredEth = (requiredEth * 99) / 100; // 1% slippage allowance
         
@@ -195,7 +202,7 @@ contract AcidTestTest is Test {
     function test_MintWithETHRefund() public {
         uint256 amount = 1;
         (, int256 answer, , ,) = aggregator.latestRoundData();
-        uint256 ethToOneDollar = 1e24 / uint256(answer);
+        uint256 ethToOneDollar = 1e26 / uint256(answer);
         uint256 requiredEth = (TOKEN_PRICE * amount * ethToOneDollar) / 1e6;
         
         // Send extra ETH so that a refund is triggered.
@@ -214,7 +221,7 @@ contract AcidTestTest is Test {
     function test_MintWithWETH() public {
         uint256 amount = 3;
         (, int256 answer, , ,) = aggregator.latestRoundData();
-        uint256 ethToOneDollar = 1e24 / uint256(answer);
+        uint256 ethToOneDollar = 1e26 / uint256(answer);
         // Adjust for 18 decimals
         uint256 requiredWeth = (TOKEN_PRICE * amount * ethToOneDollar) / 1e6;
         
