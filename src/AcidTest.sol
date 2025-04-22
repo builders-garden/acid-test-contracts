@@ -35,7 +35,7 @@ contract AcidTest is ERC1155, Ownable, ReentrancyGuard, ERC2981 {
     mapping (address operator=> bool) public s_operators;
     string public contractURIMetadata;
     AggregatorV3Interface public aggregatorV3; 
-
+    string public constant name = "ACID TEST";
     // ======================= Structs =======================
     struct TokenInfo {
         uint32 salesStartDate;
@@ -273,5 +273,9 @@ contract AcidTest is ERC1155, Ownable, ReentrancyGuard, ERC2981 {
         }
 
         emit OperatorsStateChanged(operators, isOperator);  
+    }
+
+    function setRoyalty(uint256 tokenId, address royaltyRecipient, uint96 royaltyFee) public onlyOwner {
+        _setTokenRoyalty(tokenId, royaltyRecipient, royaltyFee);
     }
 }       

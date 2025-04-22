@@ -481,5 +481,14 @@ contract AcidTestTest is Test {
         (royaltyReceiver, royaltyAmount) = acidTest.royaltyInfo(1, salePrice);
         assertEq(royaltyAmount, salePrice / 10);
     }
-
+    
+    function test_setRoyalty() public {
+        address newReceiver = address(0x99);
+        vm.prank(owner);
+        acidTest.setRoyalty(1, newReceiver, 1000);
+        
+        (address royaltyReceiver, uint256 royaltyAmount) = acidTest.royaltyInfo(1, 1e18);
+        assertEq(royaltyReceiver, newReceiver);
+        assertEq(royaltyAmount, 1e18 / 10);
+    }   
 }
