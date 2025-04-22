@@ -61,7 +61,7 @@ contract AcidTestTest is Test {
     address public owner;
     address public receiver;
     address public user;
-
+    address public metadataOperator;
     // Constants adjusted for decimals
     uint256 public constant INITIAL_USDC_BALANCE = 1000 * 1e6; // 1000 USDC with 18 decimals
     uint256 public constant INITIAL_WETH_BALANCE = 1000 * 1e18; // 1000 WETH with 18 decimals
@@ -73,7 +73,7 @@ contract AcidTestTest is Test {
         owner = vm.addr(117384701234701293471023647012845787238437949884);
         receiver = vm.addr(213287489179103947091823740712364078126304123697482);
         user = vm.addr(1928378213982739817298312548328934136841239840192374);
-        
+        metadataOperator = vm.addr(1234567890123456789012345678901234567890);
         // Deploy mocks
         usdc = new MockERC("USD Coin", "USDC");
         weth = new MockERC("Wrapped Ether", "WETH");
@@ -91,16 +91,29 @@ contract AcidTestTest is Test {
             address(weth),
             owner,
             address(aggregator),
-            receiver
+            "ipfs://QmTNgv3jx2HHfBjQX9RnKtxj2xv2xQDtbVXoRi5rJ3a46e",
+            receiver,
+            1000
         );
         
-        // Create a token on sale (tokenId will be 1)
+        vm.prank(owner);
+        address[] memory operators = new address[](1);
+        operators[0] = metadataOperator;
+        bool[] memory isOperator = new bool[](1);
+        isOperator[0] = true;
+        acidTest.setOperators(operators, isOperator);
+       
+
+
         vm.prank(owner);
         acidTest.create(
             uint32(block.timestamp),             // salesStartDate
             uint32(block.timestamp + 1 days),    // salesExpirationDate
             uint208(TOKEN_PRICE),                // usdPrice ($1)
-            "ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/1"        // tokenUri
+            "ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/1",        // tokenUri
+            receiver, 
+            receiver, 
+            1000
         );
         
         
@@ -116,7 +129,7 @@ contract AcidTestTest is Test {
         assertEq(address(acidTest.weth()), address(weth));
         assertEq(address(acidTest.aggregatorV3()), address(aggregator));
         assertEq(acidTest.owner(), owner);
-        assertEq(acidTest.receiverAddress(), receiver);
+        
     }
 
     function test_TokenCreation() public view {
@@ -136,7 +149,10 @@ contract AcidTestTest is Test {
             uint32(block.timestamp),             // salesStartDate
             uint32(block.timestamp + 1 days),    // salesExpirationDate
             uint208(TOKEN_PRICE),                // usdPrice ($1 in 18 decimals)
-            "ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/1"        // tokenUri
+            "ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/1",        // tokenUri
+            receiver, 
+            receiver, 
+            1000
         );
     }
 
@@ -173,9 +189,11 @@ contract AcidTestTest is Test {
         acidTest.mint{value: requiredEth}(user, 1, amount, false);
         vm.stopPrank();
 
+        AcidTest.TokenInfo memory info = acidTest.getTokenInfo(1);
+        
         // Add descriptive messages to assertions
         assertEq(acidTest.balanceOf(user, 1), amount, "User balance should match the minted amount");
-        assertEq(address(acidTest.receiverAddress()).balance, requiredEth, "Receiver balance should match the required ETH");
+        assertEq(address(info.receiverAddress).balance, requiredEth, "Receiver balance should match the required ETH");
         assertEq(user.balance, INITIAL_ETH_BALANCE - requiredEth * amount, "User's ETH balance should be reduced by the required ETH");
 
         console.logUint(requiredEth);
@@ -211,10 +229,11 @@ contract AcidTestTest is Test {
         vm.prank(user);
         acidTest.mint{value: overpayment}(user, 1, amount, false);
         
+        AcidTest.TokenInfo memory info = acidTest.getTokenInfo(1);
         // Verify token minting.
         assertEq(acidTest.balanceOf(user, 1), amount);
         // After refund, the contract should only have kept exactly the 'requiredEth'.
-        assertEq(address(acidTest.receiverAddress()).balance, requiredEth);
+        assertEq(address(info.receiverAddress).balance, requiredEth);
         // (Note: Due to gas costs, checking the user's balance exactly is not reliable in tests.)
     }
   
@@ -243,7 +262,10 @@ contract AcidTestTest is Test {
             uint32(block.timestamp + 1 hours),
             uint32(block.timestamp + 2 hours),
             uint208(TOKEN_PRICE),
-            "ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/2"
+            "ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/2",
+            receiver, 
+            receiver, 
+            1000
         );
         
         vm.prank(user);
@@ -288,7 +310,10 @@ contract AcidTestTest is Test {
                 uint32(block.timestamp),
                 uint32(block.timestamp + 1 days),
                 uint208(TOKEN_PRICE),   
-                "ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/n"
+                "ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/n",
+                receiver, 
+                receiver, 
+                1000
             );
         }
         for (uint i=2; i <11; i++){
@@ -304,35 +329,24 @@ contract AcidTestTest is Test {
         uint32 newEndDate = uint32(block.timestamp + 2 days);
         uint208 newPrice = uint208(TOKEN_PRICE * 2); // Explicit casting
         string memory newUri = "ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/1/updated";
-
+        address newReceiver = vm.addr(4);
         vm.prank(owner);
-        acidTest.modifyTokenInfo(1, newStartDate, newEndDate, newPrice, newUri);
+        acidTest.modifyTokenInfo(1, newStartDate, newEndDate, newPrice, newUri, newReceiver);
         
         AcidTest.TokenInfo memory info = acidTest.getTokenInfo(1);
         assertEq(info.salesStartDate, newStartDate);
         assertEq(info.salesExpirationDate, newEndDate);
         assertEq(info.usdPrice, newPrice);
         assertEq(info.uri, newUri);
+        assertEq(info.receiverAddress, newReceiver);
     }
     
-    function test_SetReceiverAddress() public {
-        address newReceiver = vm.addr(4);
-        
-        vm.prank(owner);
-        acidTest.setReceiverAddress(newReceiver);
-        assertEq(acidTest.receiverAddress(), newReceiver);
-    }
+   
     
     function test_RevertModifyTokenInfoNonOwner() public {
         vm.prank(user);
         vm.expectRevert();
-        acidTest.modifyTokenInfo(1, 0, 0, 0, "");
-    }
-    
-    function test_RevertSetReceiverAddressNonOwner() public {
-        vm.prank(user);
-        vm.expectRevert();
-        acidTest.setReceiverAddress(address(0x1));
+        acidTest.modifyTokenInfo(1, 0, 0, 0, "", address(0x1));
     }
 
 
@@ -353,7 +367,10 @@ contract AcidTestTest is Test {
                 uint32(block.timestamp),             // salesStartDate
                 uint32(block.timestamp + 1 days),    // salesExpirationDate
                 uint208(TOKEN_PRICE * i),            // usdPrice ($1, $2, $3, ...)
-                string(abi.encodePacked("ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/", i)) // tokenUri
+                string(abi.encodePacked("ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/token/", i)),// tokenUri
+                receiver, 
+                receiver, 
+                1000
             );
         }
 
@@ -395,4 +412,74 @@ contract AcidTestTest is Test {
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, newOwner));
         acidTest.transferOwnership(newOwner);
     }
+
+    function test_SetContractURI() public {
+        string memory newContractURI = "ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/contract/1";
+        vm.prank(metadataOperator);
+        acidTest.setContractURI(newContractURI);
+        assertEq(acidTest.contractURI(), newContractURI);
+        newContractURI = "ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/contract/2";
+        vm.prank(owner);
+        acidTest.setContractURI(newContractURI);
+        assertEq(acidTest.contractURI(), newContractURI);
+    }
+
+    function test_SetContractURI_NotMetadataOperator() public {
+        string memory newContractURI = "ipfs://QmS4ghgMgPXDqF3aSaW34D2WQJQf6XeT3b3Y5eF2F2F/contract/1";
+        vm.prank(user);
+        vm.expectRevert();
+        acidTest.setContractURI(newContractURI);
+    }
+    
+    function test_SetOperators() public {
+        
+        address[] memory operators = new address[](1);
+        operators[0] = metadataOperator;
+        bool[] memory isOperator = new bool[](1);
+        isOperator[0] = true;
+        vm.prank(owner);
+        acidTest.setOperators(operators, isOperator);
+
+        // Call s_operators as a function with the metadataOperator as parameter
+        vm.prank(owner);
+        bool isOp = acidTest.s_operators(metadataOperator);
+        assertEq(isOp, true); 
+
+        isOperator[0] = false;
+        vm.prank(owner);
+        acidTest.setOperators(operators, isOperator);
+        isOp = acidTest.s_operators(metadataOperator);
+        assertEq(isOp, false);
+    }   
+
+    function test_SetOperators_NotOwner() public {
+        vm.prank(metadataOperator);
+        vm.expectRevert();
+        acidTest.setOperators(new address[](0), new bool[](0));
+    }   
+
+
+    function test_royaltyInfo() public {
+        (address receiver, uint256 royaltyAmount) = acidTest.royaltyInfo(1, 1e18);
+        assertEq(receiver, receiver);
+        assertEq(royaltyAmount, 1e18 / 10);
+    }
+    
+    function test_tokenRoyalty() public {
+        // Test for token 1 which was created in setUp with 1000 (10%) royalty fee
+        uint256 salePrice = 1 ether;
+        (address royaltyReceiver, uint256 royaltyAmount) = acidTest.royaltyInfo(1, salePrice);
+        
+        // Check receiver is correct (should be the 'receiver' address from setUp)
+        assertEq(royaltyReceiver, receiver);
+        
+        // Check royalty amount is 10% of sale price (1000 = 10%)
+        assertEq(royaltyAmount, salePrice / 10);
+        
+        // Test for a different sale price
+        salePrice = 5 ether;
+        (royaltyReceiver, royaltyAmount) = acidTest.royaltyInfo(1, salePrice);
+        assertEq(royaltyAmount, salePrice / 10);
+    }
+
 }

@@ -11,10 +11,13 @@ contract AcidTestDeployer is Script, ContractAddresses {
         // Get owner and receiver addresses from environment variables
         address owner = vm.envAddress("OWNER_ADDRESS");
         address receiver = vm.envAddress("RECEIVER_ADDRESS");
+        address royaltyRecipient = vm.envAddress("ROYALTY_RECIPIENT");
+        uint96 royaltyFee = uint96(vm.envUint("ROYALTY_FEE"));
+        string memory contractURI = vm.envString("CONTRACT_URI");
         
         vm.startBroadcast();
 
-        new AcidTest(USDC_BASE_MAINNET, WETH_BASE_MAINNET, owner, AGGREGATOR_V3_BASE_MAINNET, receiver);
+        new AcidTest(USDC_BASE_MAINNET, WETH_BASE_MAINNET, owner, AGGREGATOR_V3_BASE_MAINNET, contractURI, royaltyRecipient, royaltyFee);
     
         vm.stopBroadcast();
     }   

@@ -55,6 +55,11 @@ forge script script/AcidTestDeployer.sol:AcidTestDeployer \
 --private-key <PRIVATE_KEY> --broadcast
 ```
 
+### Verify 
+```shell 
+forge verify-contract <CONTRACT_ADDRESS> src/AcidTest.sol:AcidTest --chain base --etherscan-api-key <BASESCAN_APIKEY> --compiler-version <COMPILER_VERSION> --constructor-args $(cast abi-encode "constructor(address,address,address,address,address)" <USDC_ADDRESS> <WETH_ADDRESS> <OWNER_ADDRESS> <AGGREGATOR_v3_ADDRESS> <RECEIVER_ADDRESS> )
+```
+
 ### Cast
 
 ```shell
