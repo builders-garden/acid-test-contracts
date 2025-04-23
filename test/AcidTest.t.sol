@@ -491,4 +491,10 @@ contract AcidTestTest is Test {
         assertEq(royaltyReceiver, newReceiver);
         assertEq(royaltyAmount, 1e18 / 10);
     }   
+
+
+    function test_mintUnexistentToken() public {
+        vm.expectRevert();
+        acidTest.mint(user, 1000, 1, false);
+    }
 }

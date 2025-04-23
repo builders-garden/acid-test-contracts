@@ -1,96 +1,166 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0 ^0.8.20 ^0.8.28;
 
-// src/interfaces/AggregatorV3Interface.sol
+// lib/openzeppelin-contracts/contracts/interfaces/draft-IERC6093.sol
 
-// solhint-disable-next-line interface-starts-with-i
-interface AggregatorV3Interface {
-  function decimals() external view returns (uint8);
-
-  function description() external view returns (string memory);
-
-  function version() external view returns (uint256);
-
-  function getRoundData(
-    uint80 _roundId
-  ) external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
-
-  function latestRoundData()
-    external
-    view
-    returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
-}
-
-// lib/openzeppelin-contracts/contracts/utils/Comparators.sol
-
-// OpenZeppelin Contracts (last updated v5.1.0) (utils/Comparators.sol)
+// OpenZeppelin Contracts (last updated v5.1.0) (interfaces/draft-IERC6093.sol)
 
 /**
- * @dev Provides a set of functions to compare values.
- *
- * _Available since v5.1._
+ * @dev Standard ERC-20 Errors
+ * Interface of the https://eips.ethereum.org/EIPS/eip-6093[ERC-6093] custom errors for ERC-20 tokens.
  */
-library Comparators {
-    function lt(uint256 a, uint256 b) internal pure returns (bool) {
-        return a < b;
-    }
-
-    function gt(uint256 a, uint256 b) internal pure returns (bool) {
-        return a > b;
-    }
-}
-
-// lib/openzeppelin-contracts/contracts/utils/Context.sol
-
-// OpenZeppelin Contracts (last updated v5.0.1) (utils/Context.sol)
-
-/**
- * @dev Provides information about the current execution context, including the
- * sender of the transaction and its data. While these are generally available
- * via msg.sender and msg.data, they should not be accessed in such a direct
- * manner, since when dealing with meta-transactions the account sending and
- * paying for execution may not be the actual sender (as far as an application
- * is concerned).
- *
- * This contract is only required for intermediate, library-like contracts.
- */
-abstract contract Context {
-    function _msgSender() internal view virtual returns (address) {
-        return msg.sender;
-    }
-
-    function _msgData() internal view virtual returns (bytes calldata) {
-        return msg.data;
-    }
-
-    function _contextSuffixLength() internal view virtual returns (uint256) {
-        return 0;
-    }
-}
-
-// lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol
-
-// OpenZeppelin Contracts (last updated v5.1.0) (utils/introspection/IERC165.sol)
-
-/**
- * @dev Interface of the ERC-165 standard, as defined in the
- * https://eips.ethereum.org/EIPS/eip-165[ERC].
- *
- * Implementers can declare support of contract interfaces, which can then be
- * queried by others ({ERC165Checker}).
- *
- * For an implementation, see {ERC165}.
- */
-interface IERC165 {
+interface IERC20Errors {
     /**
-     * @dev Returns true if this contract implements the interface defined by
-     * `interfaceId`. See the corresponding
-     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[ERC section]
-     * to learn more about how these ids are created.
-     *
-     * This function call must use less than 30 000 gas.
+     * @dev Indicates an error related to the current `balance` of a `sender`. Used in transfers.
+     * @param sender Address whose tokens are being transferred.
+     * @param balance Current balance for the interacting account.
+     * @param needed Minimum amount required to perform a transfer.
      */
-    function supportsInterface(bytes4 interfaceId) external view returns (bool);
+    error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed);
+
+    /**
+     * @dev Indicates a failure with the token `sender`. Used in transfers.
+     * @param sender Address whose tokens are being transferred.
+     */
+    error ERC20InvalidSender(address sender);
+
+    /**
+     * @dev Indicates a failure with the token `receiver`. Used in transfers.
+     * @param receiver Address to which tokens are being transferred.
+     */
+    error ERC20InvalidReceiver(address receiver);
+
+    /**
+     * @dev Indicates a failure with the `spender`’s `allowance`. Used in transfers.
+     * @param spender Address that may be allowed to operate on tokens without being their owner.
+     * @param allowance Amount of tokens a `spender` is allowed to operate with.
+     * @param needed Minimum amount required to perform a transfer.
+     */
+    error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed);
+
+    /**
+     * @dev Indicates a failure with the `approver` of a token to be approved. Used in approvals.
+     * @param approver Address initiating an approval operation.
+     */
+    error ERC20InvalidApprover(address approver);
+
+    /**
+     * @dev Indicates a failure with the `spender` to be approved. Used in approvals.
+     * @param spender Address that may be allowed to operate on tokens without being their owner.
+     */
+    error ERC20InvalidSpender(address spender);
+}
+
+/**
+ * @dev Standard ERC-721 Errors
+ * Interface of the https://eips.ethereum.org/EIPS/eip-6093[ERC-6093] custom errors for ERC-721 tokens.
+ */
+interface IERC721Errors {
+    /**
+     * @dev Indicates that an address can't be an owner. For example, `address(0)` is a forbidden owner in ERC-20.
+     * Used in balance queries.
+     * @param owner Address of the current owner of a token.
+     */
+    error ERC721InvalidOwner(address owner);
+
+    /**
+     * @dev Indicates a `tokenId` whose `owner` is the zero address.
+     * @param tokenId Identifier number of a token.
+     */
+    error ERC721NonexistentToken(uint256 tokenId);
+
+    /**
+     * @dev Indicates an error related to the ownership over a particular token. Used in transfers.
+     * @param sender Address whose tokens are being transferred.
+     * @param tokenId Identifier number of a token.
+     * @param owner Address of the current owner of a token.
+     */
+    error ERC721IncorrectOwner(address sender, uint256 tokenId, address owner);
+
+    /**
+     * @dev Indicates a failure with the token `sender`. Used in transfers.
+     * @param sender Address whose tokens are being transferred.
+     */
+    error ERC721InvalidSender(address sender);
+
+    /**
+     * @dev Indicates a failure with the token `receiver`. Used in transfers.
+     * @param receiver Address to which tokens are being transferred.
+     */
+    error ERC721InvalidReceiver(address receiver);
+
+    /**
+     * @dev Indicates a failure with the `operator`’s approval. Used in transfers.
+     * @param operator Address that may be allowed to operate on tokens without being their owner.
+     * @param tokenId Identifier number of a token.
+     */
+    error ERC721InsufficientApproval(address operator, uint256 tokenId);
+
+    /**
+     * @dev Indicates a failure with the `approver` of a token to be approved. Used in approvals.
+     * @param approver Address initiating an approval operation.
+     */
+    error ERC721InvalidApprover(address approver);
+
+    /**
+     * @dev Indicates a failure with the `operator` to be approved. Used in approvals.
+     * @param operator Address that may be allowed to operate on tokens without being their owner.
+     */
+    error ERC721InvalidOperator(address operator);
+}
+
+/**
+ * @dev Standard ERC-1155 Errors
+ * Interface of the https://eips.ethereum.org/EIPS/eip-6093[ERC-6093] custom errors for ERC-1155 tokens.
+ */
+interface IERC1155Errors {
+    /**
+     * @dev Indicates an error related to the current `balance` of a `sender`. Used in transfers.
+     * @param sender Address whose tokens are being transferred.
+     * @param balance Current balance for the interacting account.
+     * @param needed Minimum amount required to perform a transfer.
+     * @param tokenId Identifier number of a token.
+     */
+    error ERC1155InsufficientBalance(address sender, uint256 balance, uint256 needed, uint256 tokenId);
+
+    /**
+     * @dev Indicates a failure with the token `sender`. Used in transfers.
+     * @param sender Address whose tokens are being transferred.
+     */
+    error ERC1155InvalidSender(address sender);
+
+    /**
+     * @dev Indicates a failure with the token `receiver`. Used in transfers.
+     * @param receiver Address to which tokens are being transferred.
+     */
+    error ERC1155InvalidReceiver(address receiver);
+
+    /**
+     * @dev Indicates a failure with the `operator`’s approval. Used in transfers.
+     * @param operator Address that may be allowed to operate on tokens without being their owner.
+     * @param owner Address of the current owner of a token.
+     */
+    error ERC1155MissingApprovalForAll(address operator, address owner);
+
+    /**
+     * @dev Indicates a failure with the `approver` of a token to be approved. Used in approvals.
+     * @param approver Address initiating an approval operation.
+     */
+    error ERC1155InvalidApprover(address approver);
+
+    /**
+     * @dev Indicates a failure with the `operator` to be approved. Used in approvals.
+     * @param operator Address that may be allowed to operate on tokens without being their owner.
+     */
+    error ERC1155InvalidOperator(address operator);
+
+    /**
+     * @dev Indicates an array length mismatch between ids and values in a safeBatchTransferFrom operation.
+     * Used in batch transfers.
+     * @param idsLength Length of the array of token identifiers
+     * @param valuesLength Length of the array of token amounts
+     */
+    error ERC1155InvalidArrayLength(uint256 idsLength, uint256 valuesLength);
 }
 
 // lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol
@@ -170,6 +240,53 @@ interface IERC20 {
      * Emits a {Transfer} event.
      */
     function transferFrom(address from, address to, uint256 value) external returns (bool);
+}
+
+// lib/openzeppelin-contracts/contracts/utils/Comparators.sol
+
+// OpenZeppelin Contracts (last updated v5.1.0) (utils/Comparators.sol)
+
+/**
+ * @dev Provides a set of functions to compare values.
+ *
+ * _Available since v5.1._
+ */
+library Comparators {
+    function lt(uint256 a, uint256 b) internal pure returns (bool) {
+        return a < b;
+    }
+
+    function gt(uint256 a, uint256 b) internal pure returns (bool) {
+        return a > b;
+    }
+}
+
+// lib/openzeppelin-contracts/contracts/utils/Context.sol
+
+// OpenZeppelin Contracts (last updated v5.0.1) (utils/Context.sol)
+
+/**
+ * @dev Provides information about the current execution context, including the
+ * sender of the transaction and its data. While these are generally available
+ * via msg.sender and msg.data, they should not be accessed in such a direct
+ * manner, since when dealing with meta-transactions the account sending and
+ * paying for execution may not be the actual sender (as far as an application
+ * is concerned).
+ *
+ * This contract is only required for intermediate, library-like contracts.
+ */
+abstract contract Context {
+    function _msgSender() internal view virtual returns (address) {
+        return msg.sender;
+    }
+
+    function _msgData() internal view virtual returns (bytes calldata) {
+        return msg.data;
+    }
+
+    function _contextSuffixLength() internal view virtual returns (uint256) {
+        return 0;
+    }
 }
 
 // lib/openzeppelin-contracts/contracts/utils/Panic.sol
@@ -314,6 +431,329 @@ abstract contract ReentrancyGuard {
     function _reentrancyGuardEntered() internal view returns (bool) {
         return _status == ENTERED;
     }
+}
+
+// lib/openzeppelin-contracts/contracts/utils/SlotDerivation.sol
+
+// OpenZeppelin Contracts (last updated v5.1.0) (utils/SlotDerivation.sol)
+// This file was procedurally generated from scripts/generate/templates/SlotDerivation.js.
+
+/**
+ * @dev Library for computing storage (and transient storage) locations from namespaces and deriving slots
+ * corresponding to standard patterns. The derivation method for array and mapping matches the storage layout used by
+ * the solidity language / compiler.
+ *
+ * See https://docs.soliditylang.org/en/v0.8.20/internals/layout_in_storage.html#mappings-and-dynamic-arrays[Solidity docs for mappings and dynamic arrays.].
+ *
+ * Example usage:
+ * ```solidity
+ * contract Example {
+ *     // Add the library methods
+ *     using StorageSlot for bytes32;
+ *     using SlotDerivation for bytes32;
+ *
+ *     // Declare a namespace
+ *     string private constant _NAMESPACE = "<namespace>" // eg. OpenZeppelin.Slot
+ *
+ *     function setValueInNamespace(uint256 key, address newValue) internal {
+ *         _NAMESPACE.erc7201Slot().deriveMapping(key).getAddressSlot().value = newValue;
+ *     }
+ *
+ *     function getValueInNamespace(uint256 key) internal view returns (address) {
+ *         return _NAMESPACE.erc7201Slot().deriveMapping(key).getAddressSlot().value;
+ *     }
+ * }
+ * ```
+ *
+ * TIP: Consider using this library along with {StorageSlot}.
+ *
+ * NOTE: This library provides a way to manipulate storage locations in a non-standard way. Tooling for checking
+ * upgrade safety will ignore the slots accessed through this library.
+ *
+ * _Available since v5.1._
+ */
+library SlotDerivation {
+    /**
+     * @dev Derive an ERC-7201 slot from a string (namespace).
+     */
+    function erc7201Slot(string memory namespace) internal pure returns (bytes32 slot) {
+        assembly ("memory-safe") {
+            mstore(0x00, sub(keccak256(add(namespace, 0x20), mload(namespace)), 1))
+            slot := and(keccak256(0x00, 0x20), not(0xff))
+        }
+    }
+
+    /**
+     * @dev Add an offset to a slot to get the n-th element of a structure or an array.
+     */
+    function offset(bytes32 slot, uint256 pos) internal pure returns (bytes32 result) {
+        unchecked {
+            return bytes32(uint256(slot) + pos);
+        }
+    }
+
+    /**
+     * @dev Derive the location of the first element in an array from the slot where the length is stored.
+     */
+    function deriveArray(bytes32 slot) internal pure returns (bytes32 result) {
+        assembly ("memory-safe") {
+            mstore(0x00, slot)
+            result := keccak256(0x00, 0x20)
+        }
+    }
+
+    /**
+     * @dev Derive the location of a mapping element from the key.
+     */
+    function deriveMapping(bytes32 slot, address key) internal pure returns (bytes32 result) {
+        assembly ("memory-safe") {
+            mstore(0x00, and(key, shr(96, not(0))))
+            mstore(0x20, slot)
+            result := keccak256(0x00, 0x40)
+        }
+    }
+
+    /**
+     * @dev Derive the location of a mapping element from the key.
+     */
+    function deriveMapping(bytes32 slot, bool key) internal pure returns (bytes32 result) {
+        assembly ("memory-safe") {
+            mstore(0x00, iszero(iszero(key)))
+            mstore(0x20, slot)
+            result := keccak256(0x00, 0x40)
+        }
+    }
+
+    /**
+     * @dev Derive the location of a mapping element from the key.
+     */
+    function deriveMapping(bytes32 slot, bytes32 key) internal pure returns (bytes32 result) {
+        assembly ("memory-safe") {
+            mstore(0x00, key)
+            mstore(0x20, slot)
+            result := keccak256(0x00, 0x40)
+        }
+    }
+
+    /**
+     * @dev Derive the location of a mapping element from the key.
+     */
+    function deriveMapping(bytes32 slot, uint256 key) internal pure returns (bytes32 result) {
+        assembly ("memory-safe") {
+            mstore(0x00, key)
+            mstore(0x20, slot)
+            result := keccak256(0x00, 0x40)
+        }
+    }
+
+    /**
+     * @dev Derive the location of a mapping element from the key.
+     */
+    function deriveMapping(bytes32 slot, int256 key) internal pure returns (bytes32 result) {
+        assembly ("memory-safe") {
+            mstore(0x00, key)
+            mstore(0x20, slot)
+            result := keccak256(0x00, 0x40)
+        }
+    }
+
+    /**
+     * @dev Derive the location of a mapping element from the key.
+     */
+    function deriveMapping(bytes32 slot, string memory key) internal pure returns (bytes32 result) {
+        assembly ("memory-safe") {
+            let length := mload(key)
+            let begin := add(key, 0x20)
+            let end := add(begin, length)
+            let cache := mload(end)
+            mstore(end, slot)
+            result := keccak256(begin, add(length, 0x20))
+            mstore(end, cache)
+        }
+    }
+
+    /**
+     * @dev Derive the location of a mapping element from the key.
+     */
+    function deriveMapping(bytes32 slot, bytes memory key) internal pure returns (bytes32 result) {
+        assembly ("memory-safe") {
+            let length := mload(key)
+            let begin := add(key, 0x20)
+            let end := add(begin, length)
+            let cache := mload(end)
+            mstore(end, slot)
+            result := keccak256(begin, add(length, 0x20))
+            mstore(end, cache)
+        }
+    }
+}
+
+// lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol
+
+// OpenZeppelin Contracts (last updated v5.1.0) (utils/StorageSlot.sol)
+// This file was procedurally generated from scripts/generate/templates/StorageSlot.js.
+
+/**
+ * @dev Library for reading and writing primitive types to specific storage slots.
+ *
+ * Storage slots are often used to avoid storage conflict when dealing with upgradeable contracts.
+ * This library helps with reading and writing to such slots without the need for inline assembly.
+ *
+ * The functions in this library return Slot structs that contain a `value` member that can be used to read or write.
+ *
+ * Example usage to set ERC-1967 implementation slot:
+ * ```solidity
+ * contract ERC1967 {
+ *     // Define the slot. Alternatively, use the SlotDerivation library to derive the slot.
+ *     bytes32 internal constant _IMPLEMENTATION_SLOT = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
+ *
+ *     function _getImplementation() internal view returns (address) {
+ *         return StorageSlot.getAddressSlot(_IMPLEMENTATION_SLOT).value;
+ *     }
+ *
+ *     function _setImplementation(address newImplementation) internal {
+ *         require(newImplementation.code.length > 0);
+ *         StorageSlot.getAddressSlot(_IMPLEMENTATION_SLOT).value = newImplementation;
+ *     }
+ * }
+ * ```
+ *
+ * TIP: Consider using this library along with {SlotDerivation}.
+ */
+library StorageSlot {
+    struct AddressSlot {
+        address value;
+    }
+
+    struct BooleanSlot {
+        bool value;
+    }
+
+    struct Bytes32Slot {
+        bytes32 value;
+    }
+
+    struct Uint256Slot {
+        uint256 value;
+    }
+
+    struct Int256Slot {
+        int256 value;
+    }
+
+    struct StringSlot {
+        string value;
+    }
+
+    struct BytesSlot {
+        bytes value;
+    }
+
+    /**
+     * @dev Returns an `AddressSlot` with member `value` located at `slot`.
+     */
+    function getAddressSlot(bytes32 slot) internal pure returns (AddressSlot storage r) {
+        assembly ("memory-safe") {
+            r.slot := slot
+        }
+    }
+
+    /**
+     * @dev Returns a `BooleanSlot` with member `value` located at `slot`.
+     */
+    function getBooleanSlot(bytes32 slot) internal pure returns (BooleanSlot storage r) {
+        assembly ("memory-safe") {
+            r.slot := slot
+        }
+    }
+
+    /**
+     * @dev Returns a `Bytes32Slot` with member `value` located at `slot`.
+     */
+    function getBytes32Slot(bytes32 slot) internal pure returns (Bytes32Slot storage r) {
+        assembly ("memory-safe") {
+            r.slot := slot
+        }
+    }
+
+    /**
+     * @dev Returns a `Uint256Slot` with member `value` located at `slot`.
+     */
+    function getUint256Slot(bytes32 slot) internal pure returns (Uint256Slot storage r) {
+        assembly ("memory-safe") {
+            r.slot := slot
+        }
+    }
+
+    /**
+     * @dev Returns a `Int256Slot` with member `value` located at `slot`.
+     */
+    function getInt256Slot(bytes32 slot) internal pure returns (Int256Slot storage r) {
+        assembly ("memory-safe") {
+            r.slot := slot
+        }
+    }
+
+    /**
+     * @dev Returns a `StringSlot` with member `value` located at `slot`.
+     */
+    function getStringSlot(bytes32 slot) internal pure returns (StringSlot storage r) {
+        assembly ("memory-safe") {
+            r.slot := slot
+        }
+    }
+
+    /**
+     * @dev Returns an `StringSlot` representation of the string storage pointer `store`.
+     */
+    function getStringSlot(string storage store) internal pure returns (StringSlot storage r) {
+        assembly ("memory-safe") {
+            r.slot := store.slot
+        }
+    }
+
+    /**
+     * @dev Returns a `BytesSlot` with member `value` located at `slot`.
+     */
+    function getBytesSlot(bytes32 slot) internal pure returns (BytesSlot storage r) {
+        assembly ("memory-safe") {
+            r.slot := slot
+        }
+    }
+
+    /**
+     * @dev Returns an `BytesSlot` representation of the bytes storage pointer `store`.
+     */
+    function getBytesSlot(bytes storage store) internal pure returns (BytesSlot storage r) {
+        assembly ("memory-safe") {
+            r.slot := store.slot
+        }
+    }
+}
+
+// lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol
+
+// OpenZeppelin Contracts (last updated v5.1.0) (utils/introspection/IERC165.sol)
+
+/**
+ * @dev Interface of the ERC-165 standard, as defined in the
+ * https://eips.ethereum.org/EIPS/eip-165[ERC].
+ *
+ * Implementers can declare support of contract interfaces, which can then be
+ * queried by others ({ERC165Checker}).
+ *
+ * For an implementation, see {ERC165}.
+ */
+interface IERC165 {
+    /**
+     * @dev Returns true if this contract implements the interface defined by
+     * `interfaceId`. See the corresponding
+     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[ERC section]
+     * to learn more about how these ids are created.
+     *
+     * This function call must use less than 30 000 gas.
+     */
+    function supportsInterface(bytes4 interfaceId) external view returns (bool);
 }
 
 // lib/openzeppelin-contracts/contracts/utils/math/SafeCast.sol
@@ -1478,489 +1918,146 @@ library SafeCast {
     }
 }
 
-// lib/openzeppelin-contracts/contracts/utils/SlotDerivation.sol
+// src/interfaces/AggregatorV3Interface.sol
 
-// OpenZeppelin Contracts (last updated v5.1.0) (utils/SlotDerivation.sol)
-// This file was procedurally generated from scripts/generate/templates/SlotDerivation.js.
+// solhint-disable-next-line interface-starts-with-i
+interface AggregatorV3Interface {
+  function decimals() external view returns (uint8);
+
+  function description() external view returns (string memory);
+
+  function version() external view returns (uint256);
+
+  function getRoundData(
+    uint80 _roundId
+  ) external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
+
+  function latestRoundData()
+    external
+    view
+    returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
+}
+
+// lib/openzeppelin-contracts/contracts/access/Ownable.sol
+
+// OpenZeppelin Contracts (last updated v5.0.0) (access/Ownable.sol)
 
 /**
- * @dev Library for computing storage (and transient storage) locations from namespaces and deriving slots
- * corresponding to standard patterns. The derivation method for array and mapping matches the storage layout used by
- * the solidity language / compiler.
+ * @dev Contract module which provides a basic access control mechanism, where
+ * there is an account (an owner) that can be granted exclusive access to
+ * specific functions.
  *
- * See https://docs.soliditylang.org/en/v0.8.20/internals/layout_in_storage.html#mappings-and-dynamic-arrays[Solidity docs for mappings and dynamic arrays.].
+ * The initial owner is set to the address provided by the deployer. This can
+ * later be changed with {transferOwnership}.
  *
- * Example usage:
- * ```solidity
- * contract Example {
- *     // Add the library methods
- *     using StorageSlot for bytes32;
- *     using SlotDerivation for bytes32;
- *
- *     // Declare a namespace
- *     string private constant _NAMESPACE = "<namespace>" // eg. OpenZeppelin.Slot
- *
- *     function setValueInNamespace(uint256 key, address newValue) internal {
- *         _NAMESPACE.erc7201Slot().deriveMapping(key).getAddressSlot().value = newValue;
- *     }
- *
- *     function getValueInNamespace(uint256 key) internal view returns (address) {
- *         return _NAMESPACE.erc7201Slot().deriveMapping(key).getAddressSlot().value;
- *     }
- * }
- * ```
- *
- * TIP: Consider using this library along with {StorageSlot}.
- *
- * NOTE: This library provides a way to manipulate storage locations in a non-standard way. Tooling for checking
- * upgrade safety will ignore the slots accessed through this library.
- *
- * _Available since v5.1._
+ * This module is used through inheritance. It will make available the modifier
+ * `onlyOwner`, which can be applied to your functions to restrict their use to
+ * the owner.
  */
-library SlotDerivation {
+abstract contract Ownable is Context {
+    address private _owner;
+
     /**
-     * @dev Derive an ERC-7201 slot from a string (namespace).
+     * @dev The caller account is not authorized to perform an operation.
      */
-    function erc7201Slot(string memory namespace) internal pure returns (bytes32 slot) {
-        assembly ("memory-safe") {
-            mstore(0x00, sub(keccak256(add(namespace, 0x20), mload(namespace)), 1))
-            slot := and(keccak256(0x00, 0x20), not(0xff))
+    error OwnableUnauthorizedAccount(address account);
+
+    /**
+     * @dev The owner is not a valid owner account. (eg. `address(0)`)
+     */
+    error OwnableInvalidOwner(address owner);
+
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+    /**
+     * @dev Initializes the contract setting the address provided by the deployer as the initial owner.
+     */
+    constructor(address initialOwner) {
+        if (initialOwner == address(0)) {
+            revert OwnableInvalidOwner(address(0));
+        }
+        _transferOwnership(initialOwner);
+    }
+
+    /**
+     * @dev Throws if called by any account other than the owner.
+     */
+    modifier onlyOwner() {
+        _checkOwner();
+        _;
+    }
+
+    /**
+     * @dev Returns the address of the current owner.
+     */
+    function owner() public view virtual returns (address) {
+        return _owner;
+    }
+
+    /**
+     * @dev Throws if the sender is not the owner.
+     */
+    function _checkOwner() internal view virtual {
+        if (owner() != _msgSender()) {
+            revert OwnableUnauthorizedAccount(_msgSender());
         }
     }
 
     /**
-     * @dev Add an offset to a slot to get the n-th element of a structure or an array.
+     * @dev Leaves the contract without owner. It will not be possible to call
+     * `onlyOwner` functions. Can only be called by the current owner.
+     *
+     * NOTE: Renouncing ownership will leave the contract without an owner,
+     * thereby disabling any functionality that is only available to the owner.
      */
-    function offset(bytes32 slot, uint256 pos) internal pure returns (bytes32 result) {
-        unchecked {
-            return bytes32(uint256(slot) + pos);
-        }
+    function renounceOwnership() public virtual onlyOwner {
+        _transferOwnership(address(0));
     }
 
     /**
-     * @dev Derive the location of the first element in an array from the slot where the length is stored.
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     * Can only be called by the current owner.
      */
-    function deriveArray(bytes32 slot) internal pure returns (bytes32 result) {
-        assembly ("memory-safe") {
-            mstore(0x00, slot)
-            result := keccak256(0x00, 0x20)
+    function transferOwnership(address newOwner) public virtual onlyOwner {
+        if (newOwner == address(0)) {
+            revert OwnableInvalidOwner(address(0));
         }
+        _transferOwnership(newOwner);
     }
 
     /**
-     * @dev Derive the location of a mapping element from the key.
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     * Internal function without access restriction.
      */
-    function deriveMapping(bytes32 slot, address key) internal pure returns (bytes32 result) {
-        assembly ("memory-safe") {
-            mstore(0x00, and(key, shr(96, not(0))))
-            mstore(0x20, slot)
-            result := keccak256(0x00, 0x40)
-        }
-    }
-
-    /**
-     * @dev Derive the location of a mapping element from the key.
-     */
-    function deriveMapping(bytes32 slot, bool key) internal pure returns (bytes32 result) {
-        assembly ("memory-safe") {
-            mstore(0x00, iszero(iszero(key)))
-            mstore(0x20, slot)
-            result := keccak256(0x00, 0x40)
-        }
-    }
-
-    /**
-     * @dev Derive the location of a mapping element from the key.
-     */
-    function deriveMapping(bytes32 slot, bytes32 key) internal pure returns (bytes32 result) {
-        assembly ("memory-safe") {
-            mstore(0x00, key)
-            mstore(0x20, slot)
-            result := keccak256(0x00, 0x40)
-        }
-    }
-
-    /**
-     * @dev Derive the location of a mapping element from the key.
-     */
-    function deriveMapping(bytes32 slot, uint256 key) internal pure returns (bytes32 result) {
-        assembly ("memory-safe") {
-            mstore(0x00, key)
-            mstore(0x20, slot)
-            result := keccak256(0x00, 0x40)
-        }
-    }
-
-    /**
-     * @dev Derive the location of a mapping element from the key.
-     */
-    function deriveMapping(bytes32 slot, int256 key) internal pure returns (bytes32 result) {
-        assembly ("memory-safe") {
-            mstore(0x00, key)
-            mstore(0x20, slot)
-            result := keccak256(0x00, 0x40)
-        }
-    }
-
-    /**
-     * @dev Derive the location of a mapping element from the key.
-     */
-    function deriveMapping(bytes32 slot, string memory key) internal pure returns (bytes32 result) {
-        assembly ("memory-safe") {
-            let length := mload(key)
-            let begin := add(key, 0x20)
-            let end := add(begin, length)
-            let cache := mload(end)
-            mstore(end, slot)
-            result := keccak256(begin, add(length, 0x20))
-            mstore(end, cache)
-        }
-    }
-
-    /**
-     * @dev Derive the location of a mapping element from the key.
-     */
-    function deriveMapping(bytes32 slot, bytes memory key) internal pure returns (bytes32 result) {
-        assembly ("memory-safe") {
-            let length := mload(key)
-            let begin := add(key, 0x20)
-            let end := add(begin, length)
-            let cache := mload(end)
-            mstore(end, slot)
-            result := keccak256(begin, add(length, 0x20))
-            mstore(end, cache)
-        }
+    function _transferOwnership(address newOwner) internal virtual {
+        address oldOwner = _owner;
+        _owner = newOwner;
+        emit OwnershipTransferred(oldOwner, newOwner);
     }
 }
 
-// lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol
+// lib/openzeppelin-contracts/contracts/interfaces/IERC2981.sol
 
-// OpenZeppelin Contracts (last updated v5.1.0) (utils/StorageSlot.sol)
-// This file was procedurally generated from scripts/generate/templates/StorageSlot.js.
-
-/**
- * @dev Library for reading and writing primitive types to specific storage slots.
- *
- * Storage slots are often used to avoid storage conflict when dealing with upgradeable contracts.
- * This library helps with reading and writing to such slots without the need for inline assembly.
- *
- * The functions in this library return Slot structs that contain a `value` member that can be used to read or write.
- *
- * Example usage to set ERC-1967 implementation slot:
- * ```solidity
- * contract ERC1967 {
- *     // Define the slot. Alternatively, use the SlotDerivation library to derive the slot.
- *     bytes32 internal constant _IMPLEMENTATION_SLOT = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
- *
- *     function _getImplementation() internal view returns (address) {
- *         return StorageSlot.getAddressSlot(_IMPLEMENTATION_SLOT).value;
- *     }
- *
- *     function _setImplementation(address newImplementation) internal {
- *         require(newImplementation.code.length > 0);
- *         StorageSlot.getAddressSlot(_IMPLEMENTATION_SLOT).value = newImplementation;
- *     }
- * }
- * ```
- *
- * TIP: Consider using this library along with {SlotDerivation}.
- */
-library StorageSlot {
-    struct AddressSlot {
-        address value;
-    }
-
-    struct BooleanSlot {
-        bool value;
-    }
-
-    struct Bytes32Slot {
-        bytes32 value;
-    }
-
-    struct Uint256Slot {
-        uint256 value;
-    }
-
-    struct Int256Slot {
-        int256 value;
-    }
-
-    struct StringSlot {
-        string value;
-    }
-
-    struct BytesSlot {
-        bytes value;
-    }
-
-    /**
-     * @dev Returns an `AddressSlot` with member `value` located at `slot`.
-     */
-    function getAddressSlot(bytes32 slot) internal pure returns (AddressSlot storage r) {
-        assembly ("memory-safe") {
-            r.slot := slot
-        }
-    }
-
-    /**
-     * @dev Returns a `BooleanSlot` with member `value` located at `slot`.
-     */
-    function getBooleanSlot(bytes32 slot) internal pure returns (BooleanSlot storage r) {
-        assembly ("memory-safe") {
-            r.slot := slot
-        }
-    }
-
-    /**
-     * @dev Returns a `Bytes32Slot` with member `value` located at `slot`.
-     */
-    function getBytes32Slot(bytes32 slot) internal pure returns (Bytes32Slot storage r) {
-        assembly ("memory-safe") {
-            r.slot := slot
-        }
-    }
-
-    /**
-     * @dev Returns a `Uint256Slot` with member `value` located at `slot`.
-     */
-    function getUint256Slot(bytes32 slot) internal pure returns (Uint256Slot storage r) {
-        assembly ("memory-safe") {
-            r.slot := slot
-        }
-    }
-
-    /**
-     * @dev Returns a `Int256Slot` with member `value` located at `slot`.
-     */
-    function getInt256Slot(bytes32 slot) internal pure returns (Int256Slot storage r) {
-        assembly ("memory-safe") {
-            r.slot := slot
-        }
-    }
-
-    /**
-     * @dev Returns a `StringSlot` with member `value` located at `slot`.
-     */
-    function getStringSlot(bytes32 slot) internal pure returns (StringSlot storage r) {
-        assembly ("memory-safe") {
-            r.slot := slot
-        }
-    }
-
-    /**
-     * @dev Returns an `StringSlot` representation of the string storage pointer `store`.
-     */
-    function getStringSlot(string storage store) internal pure returns (StringSlot storage r) {
-        assembly ("memory-safe") {
-            r.slot := store.slot
-        }
-    }
-
-    /**
-     * @dev Returns a `BytesSlot` with member `value` located at `slot`.
-     */
-    function getBytesSlot(bytes32 slot) internal pure returns (BytesSlot storage r) {
-        assembly ("memory-safe") {
-            r.slot := slot
-        }
-    }
-
-    /**
-     * @dev Returns an `BytesSlot` representation of the bytes storage pointer `store`.
-     */
-    function getBytesSlot(bytes storage store) internal pure returns (BytesSlot storage r) {
-        assembly ("memory-safe") {
-            r.slot := store.slot
-        }
-    }
-}
-
-// lib/openzeppelin-contracts/contracts/interfaces/draft-IERC6093.sol
-
-// OpenZeppelin Contracts (last updated v5.1.0) (interfaces/draft-IERC6093.sol)
+// OpenZeppelin Contracts (last updated v5.1.0) (interfaces/IERC2981.sol)
 
 /**
- * @dev Standard ERC-20 Errors
- * Interface of the https://eips.ethereum.org/EIPS/eip-6093[ERC-6093] custom errors for ERC-20 tokens.
- */
-interface IERC20Errors {
-    /**
-     * @dev Indicates an error related to the current `balance` of a `sender`. Used in transfers.
-     * @param sender Address whose tokens are being transferred.
-     * @param balance Current balance for the interacting account.
-     * @param needed Minimum amount required to perform a transfer.
-     */
-    error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed);
-
-    /**
-     * @dev Indicates a failure with the token `sender`. Used in transfers.
-     * @param sender Address whose tokens are being transferred.
-     */
-    error ERC20InvalidSender(address sender);
-
-    /**
-     * @dev Indicates a failure with the token `receiver`. Used in transfers.
-     * @param receiver Address to which tokens are being transferred.
-     */
-    error ERC20InvalidReceiver(address receiver);
-
-    /**
-     * @dev Indicates a failure with the `spender`’s `allowance`. Used in transfers.
-     * @param spender Address that may be allowed to operate on tokens without being their owner.
-     * @param allowance Amount of tokens a `spender` is allowed to operate with.
-     * @param needed Minimum amount required to perform a transfer.
-     */
-    error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed);
-
-    /**
-     * @dev Indicates a failure with the `approver` of a token to be approved. Used in approvals.
-     * @param approver Address initiating an approval operation.
-     */
-    error ERC20InvalidApprover(address approver);
-
-    /**
-     * @dev Indicates a failure with the `spender` to be approved. Used in approvals.
-     * @param spender Address that may be allowed to operate on tokens without being their owner.
-     */
-    error ERC20InvalidSpender(address spender);
-}
-
-/**
- * @dev Standard ERC-721 Errors
- * Interface of the https://eips.ethereum.org/EIPS/eip-6093[ERC-6093] custom errors for ERC-721 tokens.
- */
-interface IERC721Errors {
-    /**
-     * @dev Indicates that an address can't be an owner. For example, `address(0)` is a forbidden owner in ERC-20.
-     * Used in balance queries.
-     * @param owner Address of the current owner of a token.
-     */
-    error ERC721InvalidOwner(address owner);
-
-    /**
-     * @dev Indicates a `tokenId` whose `owner` is the zero address.
-     * @param tokenId Identifier number of a token.
-     */
-    error ERC721NonexistentToken(uint256 tokenId);
-
-    /**
-     * @dev Indicates an error related to the ownership over a particular token. Used in transfers.
-     * @param sender Address whose tokens are being transferred.
-     * @param tokenId Identifier number of a token.
-     * @param owner Address of the current owner of a token.
-     */
-    error ERC721IncorrectOwner(address sender, uint256 tokenId, address owner);
-
-    /**
-     * @dev Indicates a failure with the token `sender`. Used in transfers.
-     * @param sender Address whose tokens are being transferred.
-     */
-    error ERC721InvalidSender(address sender);
-
-    /**
-     * @dev Indicates a failure with the token `receiver`. Used in transfers.
-     * @param receiver Address to which tokens are being transferred.
-     */
-    error ERC721InvalidReceiver(address receiver);
-
-    /**
-     * @dev Indicates a failure with the `operator`’s approval. Used in transfers.
-     * @param operator Address that may be allowed to operate on tokens without being their owner.
-     * @param tokenId Identifier number of a token.
-     */
-    error ERC721InsufficientApproval(address operator, uint256 tokenId);
-
-    /**
-     * @dev Indicates a failure with the `approver` of a token to be approved. Used in approvals.
-     * @param approver Address initiating an approval operation.
-     */
-    error ERC721InvalidApprover(address approver);
-
-    /**
-     * @dev Indicates a failure with the `operator` to be approved. Used in approvals.
-     * @param operator Address that may be allowed to operate on tokens without being their owner.
-     */
-    error ERC721InvalidOperator(address operator);
-}
-
-/**
- * @dev Standard ERC-1155 Errors
- * Interface of the https://eips.ethereum.org/EIPS/eip-6093[ERC-6093] custom errors for ERC-1155 tokens.
- */
-interface IERC1155Errors {
-    /**
-     * @dev Indicates an error related to the current `balance` of a `sender`. Used in transfers.
-     * @param sender Address whose tokens are being transferred.
-     * @param balance Current balance for the interacting account.
-     * @param needed Minimum amount required to perform a transfer.
-     * @param tokenId Identifier number of a token.
-     */
-    error ERC1155InsufficientBalance(address sender, uint256 balance, uint256 needed, uint256 tokenId);
-
-    /**
-     * @dev Indicates a failure with the token `sender`. Used in transfers.
-     * @param sender Address whose tokens are being transferred.
-     */
-    error ERC1155InvalidSender(address sender);
-
-    /**
-     * @dev Indicates a failure with the token `receiver`. Used in transfers.
-     * @param receiver Address to which tokens are being transferred.
-     */
-    error ERC1155InvalidReceiver(address receiver);
-
-    /**
-     * @dev Indicates a failure with the `operator`’s approval. Used in transfers.
-     * @param operator Address that may be allowed to operate on tokens without being their owner.
-     * @param owner Address of the current owner of a token.
-     */
-    error ERC1155MissingApprovalForAll(address operator, address owner);
-
-    /**
-     * @dev Indicates a failure with the `approver` of a token to be approved. Used in approvals.
-     * @param approver Address initiating an approval operation.
-     */
-    error ERC1155InvalidApprover(address approver);
-
-    /**
-     * @dev Indicates a failure with the `operator` to be approved. Used in approvals.
-     * @param operator Address that may be allowed to operate on tokens without being their owner.
-     */
-    error ERC1155InvalidOperator(address operator);
-
-    /**
-     * @dev Indicates an array length mismatch between ids and values in a safeBatchTransferFrom operation.
-     * Used in batch transfers.
-     * @param idsLength Length of the array of token identifiers
-     * @param valuesLength Length of the array of token amounts
-     */
-    error ERC1155InvalidArrayLength(uint256 idsLength, uint256 valuesLength);
-}
-
-// lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol
-
-// OpenZeppelin Contracts (last updated v5.1.0) (utils/introspection/ERC165.sol)
-
-/**
- * @dev Implementation of the {IERC165} interface.
+ * @dev Interface for the NFT Royalty Standard.
  *
- * Contracts that want to implement ERC-165 should inherit from this contract and override {supportsInterface} to check
- * for the additional interface id that will be supported. For example:
- *
- * ```solidity
- * function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
- *     return interfaceId == type(MyInterface).interfaceId || super.supportsInterface(interfaceId);
- * }
- * ```
+ * A standardized way to retrieve royalty payment information for non-fungible tokens (NFTs) to enable universal
+ * support for royalty payments across all NFT marketplaces and ecosystem participants.
  */
-abstract contract ERC165 is IERC165 {
+interface IERC2981 is IERC165 {
     /**
-     * @dev See {IERC165-supportsInterface}.
+     * @dev Returns how much royalty is owed and to whom, based on a sale price that may be denominated in any unit of
+     * exchange. The royalty amount is denominated and should be paid in that same unit of exchange.
+     *
+     * NOTE: ERC-2981 allows setting the royalty to 100% of the price. In that case all the price would be sent to the
+     * royalty receiver and 0 tokens to the seller. Contracts dealing with royalty should consider empty transfers.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {
-        return interfaceId == type(IERC165).interfaceId;
-    }
+    function royaltyInfo(
+        uint256 tokenId,
+        uint256 salePrice
+    ) external view returns (address receiver, uint256 royaltyAmount);
 }
 
 // lib/openzeppelin-contracts/contracts/token/ERC1155/IERC1155.sol
@@ -2141,101 +2238,28 @@ interface IERC1155Receiver is IERC165 {
     ) external returns (bytes4);
 }
 
-// lib/openzeppelin-contracts/contracts/access/Ownable.sol
+// lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol
 
-// OpenZeppelin Contracts (last updated v5.0.0) (access/Ownable.sol)
+// OpenZeppelin Contracts (last updated v5.1.0) (utils/introspection/ERC165.sol)
 
 /**
- * @dev Contract module which provides a basic access control mechanism, where
- * there is an account (an owner) that can be granted exclusive access to
- * specific functions.
+ * @dev Implementation of the {IERC165} interface.
  *
- * The initial owner is set to the address provided by the deployer. This can
- * later be changed with {transferOwnership}.
+ * Contracts that want to implement ERC-165 should inherit from this contract and override {supportsInterface} to check
+ * for the additional interface id that will be supported. For example:
  *
- * This module is used through inheritance. It will make available the modifier
- * `onlyOwner`, which can be applied to your functions to restrict their use to
- * the owner.
+ * ```solidity
+ * function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+ *     return interfaceId == type(MyInterface).interfaceId || super.supportsInterface(interfaceId);
+ * }
+ * ```
  */
-abstract contract Ownable is Context {
-    address private _owner;
-
+abstract contract ERC165 is IERC165 {
     /**
-     * @dev The caller account is not authorized to perform an operation.
+     * @dev See {IERC165-supportsInterface}.
      */
-    error OwnableUnauthorizedAccount(address account);
-
-    /**
-     * @dev The owner is not a valid owner account. (eg. `address(0)`)
-     */
-    error OwnableInvalidOwner(address owner);
-
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-
-    /**
-     * @dev Initializes the contract setting the address provided by the deployer as the initial owner.
-     */
-    constructor(address initialOwner) {
-        if (initialOwner == address(0)) {
-            revert OwnableInvalidOwner(address(0));
-        }
-        _transferOwnership(initialOwner);
-    }
-
-    /**
-     * @dev Throws if called by any account other than the owner.
-     */
-    modifier onlyOwner() {
-        _checkOwner();
-        _;
-    }
-
-    /**
-     * @dev Returns the address of the current owner.
-     */
-    function owner() public view virtual returns (address) {
-        return _owner;
-    }
-
-    /**
-     * @dev Throws if the sender is not the owner.
-     */
-    function _checkOwner() internal view virtual {
-        if (owner() != _msgSender()) {
-            revert OwnableUnauthorizedAccount(_msgSender());
-        }
-    }
-
-    /**
-     * @dev Leaves the contract without owner. It will not be possible to call
-     * `onlyOwner` functions. Can only be called by the current owner.
-     *
-     * NOTE: Renouncing ownership will leave the contract without an owner,
-     * thereby disabling any functionality that is only available to the owner.
-     */
-    function renounceOwnership() public virtual onlyOwner {
-        _transferOwnership(address(0));
-    }
-
-    /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
-     * Can only be called by the current owner.
-     */
-    function transferOwnership(address newOwner) public virtual onlyOwner {
-        if (newOwner == address(0)) {
-            revert OwnableInvalidOwner(address(0));
-        }
-        _transferOwnership(newOwner);
-    }
-
-    /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
-     * Internal function without access restriction.
-     */
-    function _transferOwnership(address newOwner) internal virtual {
-        address oldOwner = _owner;
-        _owner = newOwner;
-        emit OwnershipTransferred(oldOwner, newOwner);
+    function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {
+        return interfaceId == type(IERC165).interfaceId;
     }
 }
 
@@ -3013,6 +3037,146 @@ library ERC1155Utils {
                 }
             }
         }
+    }
+}
+
+// lib/openzeppelin-contracts/contracts/token/common/ERC2981.sol
+
+// OpenZeppelin Contracts (last updated v5.1.0) (token/common/ERC2981.sol)
+
+/**
+ * @dev Implementation of the NFT Royalty Standard, a standardized way to retrieve royalty payment information.
+ *
+ * Royalty information can be specified globally for all token ids via {_setDefaultRoyalty}, and/or individually for
+ * specific token ids via {_setTokenRoyalty}. The latter takes precedence over the first.
+ *
+ * Royalty is specified as a fraction of sale price. {_feeDenominator} is overridable but defaults to 10000, meaning the
+ * fee is specified in basis points by default.
+ *
+ * IMPORTANT: ERC-2981 only specifies a way to signal royalty information and does not enforce its payment. See
+ * https://eips.ethereum.org/EIPS/eip-2981#optional-royalty-payments[Rationale] in the ERC. Marketplaces are expected to
+ * voluntarily pay royalties together with sales, but note that this standard is not yet widely supported.
+ */
+abstract contract ERC2981 is IERC2981, ERC165 {
+    struct RoyaltyInfo {
+        address receiver;
+        uint96 royaltyFraction;
+    }
+
+    RoyaltyInfo private _defaultRoyaltyInfo;
+    mapping(uint256 tokenId => RoyaltyInfo) private _tokenRoyaltyInfo;
+
+    /**
+     * @dev The default royalty set is invalid (eg. (numerator / denominator) >= 1).
+     */
+    error ERC2981InvalidDefaultRoyalty(uint256 numerator, uint256 denominator);
+
+    /**
+     * @dev The default royalty receiver is invalid.
+     */
+    error ERC2981InvalidDefaultRoyaltyReceiver(address receiver);
+
+    /**
+     * @dev The royalty set for a specific `tokenId` is invalid (eg. (numerator / denominator) >= 1).
+     */
+    error ERC2981InvalidTokenRoyalty(uint256 tokenId, uint256 numerator, uint256 denominator);
+
+    /**
+     * @dev The royalty receiver for `tokenId` is invalid.
+     */
+    error ERC2981InvalidTokenRoyaltyReceiver(uint256 tokenId, address receiver);
+
+    /**
+     * @dev See {IERC165-supportsInterface}.
+     */
+    function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165, ERC165) returns (bool) {
+        return interfaceId == type(IERC2981).interfaceId || super.supportsInterface(interfaceId);
+    }
+
+    /**
+     * @inheritdoc IERC2981
+     */
+    function royaltyInfo(
+        uint256 tokenId,
+        uint256 salePrice
+    ) public view virtual returns (address receiver, uint256 amount) {
+        RoyaltyInfo storage _royaltyInfo = _tokenRoyaltyInfo[tokenId];
+        address royaltyReceiver = _royaltyInfo.receiver;
+        uint96 royaltyFraction = _royaltyInfo.royaltyFraction;
+
+        if (royaltyReceiver == address(0)) {
+            royaltyReceiver = _defaultRoyaltyInfo.receiver;
+            royaltyFraction = _defaultRoyaltyInfo.royaltyFraction;
+        }
+
+        uint256 royaltyAmount = (salePrice * royaltyFraction) / _feeDenominator();
+
+        return (royaltyReceiver, royaltyAmount);
+    }
+
+    /**
+     * @dev The denominator with which to interpret the fee set in {_setTokenRoyalty} and {_setDefaultRoyalty} as a
+     * fraction of the sale price. Defaults to 10000 so fees are expressed in basis points, but may be customized by an
+     * override.
+     */
+    function _feeDenominator() internal pure virtual returns (uint96) {
+        return 10000;
+    }
+
+    /**
+     * @dev Sets the royalty information that all ids in this contract will default to.
+     *
+     * Requirements:
+     *
+     * - `receiver` cannot be the zero address.
+     * - `feeNumerator` cannot be greater than the fee denominator.
+     */
+    function _setDefaultRoyalty(address receiver, uint96 feeNumerator) internal virtual {
+        uint256 denominator = _feeDenominator();
+        if (feeNumerator > denominator) {
+            // Royalty fee will exceed the sale price
+            revert ERC2981InvalidDefaultRoyalty(feeNumerator, denominator);
+        }
+        if (receiver == address(0)) {
+            revert ERC2981InvalidDefaultRoyaltyReceiver(address(0));
+        }
+
+        _defaultRoyaltyInfo = RoyaltyInfo(receiver, feeNumerator);
+    }
+
+    /**
+     * @dev Removes default royalty information.
+     */
+    function _deleteDefaultRoyalty() internal virtual {
+        delete _defaultRoyaltyInfo;
+    }
+
+    /**
+     * @dev Sets the royalty information for a specific token id, overriding the global default.
+     *
+     * Requirements:
+     *
+     * - `receiver` cannot be the zero address.
+     * - `feeNumerator` cannot be greater than the fee denominator.
+     */
+    function _setTokenRoyalty(uint256 tokenId, address receiver, uint96 feeNumerator) internal virtual {
+        uint256 denominator = _feeDenominator();
+        if (feeNumerator > denominator) {
+            // Royalty fee will exceed the sale price
+            revert ERC2981InvalidTokenRoyalty(tokenId, feeNumerator, denominator);
+        }
+        if (receiver == address(0)) {
+            revert ERC2981InvalidTokenRoyaltyReceiver(tokenId, address(0));
+        }
+
+        _tokenRoyaltyInfo[tokenId] = RoyaltyInfo(receiver, feeNumerator);
+    }
+
+    /**
+     * @dev Resets royalty information for the token id back to the global default.
+     */
+    function _resetTokenRoyalty(uint256 tokenId) internal virtual {
+        delete _tokenRoyaltyInfo[tokenId];
     }
 }
 
@@ -3888,43 +4052,69 @@ abstract contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI, IER
 
 // src/AcidTest.sol
 
-contract AcidTest is ERC1155, Ownable, ReentrancyGuard {
+/// @title AcidTest - An ERC1155 NFT contract with multiple payment options and royalty support
+/// @notice This contract implements an ERC1155 token with USDC, ETH, and WETH payment options
+/// @dev Inherits from ERC1155, Ownable, ReentrancyGuard, and ERC2981 for royalty support
+contract AcidTest is ERC1155, Ownable, ReentrancyGuard, ERC2981 {
 
+    // ======================= Errors =======================
     error SalesNotActive(uint256 tokenId);
     error NotEnoughUSD();
     error InsufficientPayment(uint256 required, uint256 sent);
     error CannotSendETHWithWETH();
-    error InvalidReceiverAddress();
+    error NotOperatorOrOwner();
 
+    // ======================= Events =======================
     event TokenCreated(uint256 tokenId, TokenInfo tokenInfo);
-    event TokenModified(uint256 tokenId, TokenInfo tokenInfo);
-    event TokenMinted(address to, uint256 tokenId, uint256 amount, bool isWeth);
-
+    event TokenInfoUpdated(uint256 tokenId, TokenInfo tokenInfo);
+    event TokenURIUpdated(uint256 tokenId, string tokenURI);
+    event ContractURIUpdated(string newContractURI);
+    event OperatorsStateChanged(address[] operators, bool[] isOperator);    
+  
+    // ======================= State Variables =======================
     IERC20 public immutable usdc;
     IERC20 public immutable weth;
-    uint internal idCounter;
-    address public receiverAddress;
+    uint public idCounter;
     mapping (uint id=>TokenInfo) public s_tokenInfo;
-   
- 
-    AggregatorV3Interface public aggregatorV3;
-
+    mapping (address operator=> bool) public s_operators;
+    string public contractURIMetadata;
+    AggregatorV3Interface public aggregatorV3; 
+    string public constant name = "ACID TEST";
+    // ======================= Structs =======================
     struct TokenInfo {
         uint32 salesStartDate;
         uint32 salesExpirationDate;
-        uint208 usdPrice;
+        uint256 usdPrice;
         string uri;
+        address receiverAddress;
     }
 
-    /////////////////////////////////////////////////
-    /////////////////// CONSTRUCTOR /////////////////
-    /////////////////////////////////////////////////
+    // ======================= Modifiers =======================
+    /// @notice Restricts function access to metadata operators or the owner
+    /// @dev Reverts if the caller is neither an operator nor the owner
+    modifier onlyMetadataOperatorOrOwner() {
+        if (!s_operators[msg.sender] && msg.sender != owner()) revert NotOperatorOrOwner();
+        _;
+    }
 
-    constructor(address _usdc,
+    // ======================= Constructor =======================
+    /// @notice Initializes the AcidTest contract
+    /// @dev Sets up payment tokens, price feed, and royalty defaults
+    /// @param _usdc The USDC token address
+    /// @param _weth The WETH token address
+    /// @param _owner The initial owner of the contract
+    /// @param _aggregatorV3 The price feed address for ETH/USD
+    /// @param _contractURI The contract metadata URI
+    /// @param _royaltyRecipient The default recipient for royalties
+    /// @param _royaltyFee The default royalty fee (in basis points)
+    constructor(
+        address _usdc,
         address _weth, 
         address _owner, 
-        address _aggregatorV3, 
-        address _receiverAddress
+        address _aggregatorV3,
+        string memory _contractURI,
+        address _royaltyRecipient,
+        uint96 _royaltyFee
     )
         ERC1155("AcidTest")
         Ownable(_owner)
@@ -3932,59 +4122,67 @@ contract AcidTest is ERC1155, Ownable, ReentrancyGuard {
         usdc = IERC20(_usdc);   
         weth = IERC20(_weth);
         aggregatorV3 = AggregatorV3Interface(_aggregatorV3);
-        receiverAddress = _receiverAddress;
+        contractURIMetadata = _contractURI;
+        _setDefaultRoyalty(_royaltyRecipient, _royaltyFee);
     }    
     
-    receive() external payable{}
+    /// @notice Allows the contract to receive ETH
+    /// @dev Required for ETH payments and refunds
+    receive() external payable {}
 
-    /////////////////////////////////////////////////
-    ///////////////// ADMIN FUNCTIONS //////////////
-    ////////////////////////////////////////////////
-
-    function create(
-        uint32 salesStartDate,
-        uint32 salesExpirationDate, 
-        uint208 usdPrice,
-        string memory tokenUri
-    ) public onlyOwner{
-        ++idCounter;
-        s_tokenInfo[idCounter] = TokenInfo({
-            salesStartDate: salesStartDate,
-            salesExpirationDate: salesExpirationDate,
-            usdPrice: usdPrice,
-            uri: tokenUri
-        });
-
-        emit TokenCreated(idCounter, s_tokenInfo[idCounter]);
+    // ======================= View Functions =======================
+    /// @notice Gets the contract-level metadata URI for marketplaces
+    /// @dev Used by marketplaces like OpenSea for collection metadata
+    /// @return The contract metadata URI
+    function contractURI() public view returns (string memory) {
+        return contractURIMetadata;
     }
 
-    
-    function modifyTokenInfo(uint256 tokenId,
-        uint32 salesStartDate,
-        uint32 salesExpirationDate,
-        uint208 usdPrice,
-        string memory tokenUri
-    ) public onlyOwner{
-        s_tokenInfo[tokenId] = TokenInfo({
-            salesStartDate: salesStartDate,
-            salesExpirationDate: salesExpirationDate,
-            usdPrice: usdPrice,
-            uri: tokenUri   
-        }); 
-
-        emit TokenModified(tokenId, s_tokenInfo[tokenId]);
-    }
-    
-    function setReceiverAddress(address _receiverAddress) public onlyOwner{
-        if (_receiverAddress == address(0)) revert InvalidReceiverAddress();
-        receiverAddress = _receiverAddress;
+    /// @notice Gets the metadata URI for a token
+    /// @dev Overrides the ERC1155 uri function
+    /// @param tokenId The ID of the token to query
+    /// @return The metadata URI for the specified token
+    function uri(uint256 tokenId) public view override returns (string memory) {
+        return s_tokenInfo[tokenId].uri;
     }
 
-    
-    /////////////////////////////////////////////////
-    ///////////////// USER FUNCTIONS ////////////////
-    /////////////////////////////////////////////////
+    /// @notice Gets the detailed information for a token
+    /// @dev Returns the full TokenInfo struct
+    /// @param tokenId The ID of the token to query
+    /// @return The TokenInfo struct for the specified token
+    function getTokenInfo(uint256 tokenId) public view returns (TokenInfo memory) {
+        return s_tokenInfo[tokenId];
+    }
 
+    /// @notice Gets information for a range of tokens
+    /// @dev Useful for paginated queries of token information
+    /// @param startIndex The first token ID to include
+    /// @param endIndex The last token ID to include
+    /// @return An array of TokenInfo structs for the specified range
+    function getTokenInfos(uint128 startIndex, uint128 endIndex) public view returns (TokenInfo[] memory) {
+        TokenInfo[] memory tokenInfos = new TokenInfo[](endIndex - startIndex + 1);
+        if (endIndex > idCounter) endIndex = uint128(idCounter);
+        for (uint128 i = startIndex; i <= endIndex; i++) {
+            tokenInfos[i - startIndex] = s_tokenInfo[i];
+        }
+        return tokenInfos;
+    }
+
+    /// @notice Checks if this contract implements an interface
+    /// @dev Handles the diamond inheritance problem between ERC1155 and ERC2981
+    /// @param interfaceId The interface identifier to check
+    /// @return True if the interface is supported
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, ERC2981) returns (bool) {
+        return ERC1155.supportsInterface(interfaceId) || ERC2981.supportsInterface(interfaceId);
+    }
+
+    // ======================= User Functions =======================
+    /// @notice Mints new tokens with payment in USDC, ETH, or WETH
+    /// @dev Includes reentrancy protection and validates sales period
+    /// @param to The recipient address for the minted tokens
+    /// @param tokenId The ID of the token to mint
+    /// @param amount The number of tokens to mint
+    /// @param isWeth Whether to use WETH for payment (true) or ETH/USDC (false)
     function mint(
         address to,
         uint256 tokenId,
@@ -3993,6 +4191,7 @@ contract AcidTest is ERC1155, Ownable, ReentrancyGuard {
     ) external payable nonReentrant {
         TokenInfo memory tokenInfo = s_tokenInfo[tokenId];
 
+        address receiverAddress = tokenInfo.receiverAddress;
         if(block.timestamp < tokenInfo.salesStartDate || block.timestamp >= tokenInfo.salesExpirationDate) 
             revert SalesNotActive(tokenId);
         
@@ -4030,16 +4229,97 @@ contract AcidTest is ERC1155, Ownable, ReentrancyGuard {
             usdc.transferFrom(msg.sender, receiverAddress, tokenInfo.usdPrice * amount);
         }
     }
-    
-    /////////////////////////////////////////////////   
-    ///////////////// VIEW FUNCTIONS ////////////////
-    /////////////////////////////////////////////////
 
-    function uri(uint256 tokenId) public view override returns (string memory) {
-        return s_tokenInfo[tokenId].uri;
+    // ======================= Admin Functions =======================
+    /// @notice Creates a new token type
+    /// @dev Only the contract owner can create new tokens
+    /// @param salesStartDate The timestamp when sales for this token begin
+    /// @param salesExpirationDate The timestamp when sales for this token end
+    /// @param usdPrice The price in USD (with 6 decimals)
+    /// @param tokenUri The metadata URI for this token
+    /// @param receiverAddress The address that receives payments for this token
+    /// @param royaltyRecipient The address that receives royalties for this token
+    /// @param royaltyFee The royalty fee in basis points (e.g., 1000 = 10%)
+    function create(
+        uint32 salesStartDate,
+        uint32 salesExpirationDate, 
+        uint256 usdPrice,
+        string memory tokenUri,
+        address receiverAddress,
+        address royaltyRecipient,
+        uint96 royaltyFee
+    ) public onlyOwner {
+        ++idCounter;
+        s_tokenInfo[idCounter] = TokenInfo({
+            salesStartDate: salesStartDate,
+            salesExpirationDate: salesExpirationDate,
+            usdPrice: usdPrice,
+            uri: tokenUri,
+            receiverAddress: receiverAddress
+        });
+        _setTokenRoyalty(idCounter, royaltyRecipient, royaltyFee);
+
+        emit TokenCreated(idCounter, s_tokenInfo[idCounter]);
     }
 
-    function getTokenInfo(uint256 tokenId) public view returns (TokenInfo memory) {
-        return s_tokenInfo[tokenId];
+    /// @notice Sets the contract-level metadata URI
+    /// @dev Only metadata operators or the owner can call this function
+    /// @param _contractURI The new contract URI to set
+    function setContractURI(string memory _contractURI) external onlyMetadataOperatorOrOwner() {
+        contractURIMetadata = _contractURI;
+        emit ContractURIUpdated(_contractURI);
+    }
+    
+    /// @notice Modifies the information of an existing token
+    /// @dev Only the contract owner can modify token info
+    /// @param tokenId The ID of the token to modify
+    /// @param salesStartDate The new timestamp when sales for this token begin
+    /// @param salesExpirationDate The new timestamp when sales for this token end
+    /// @param usdPrice The new price in USD (with 6 decimals)
+    /// @param tokenUri The new metadata URI for this token
+    /// @param receiverAddress The new address that receives payments for this token
+    function modifyTokenInfo(uint256 tokenId,
+        uint32 salesStartDate,
+        uint32 salesExpirationDate,
+        uint256 usdPrice,
+        string memory tokenUri,
+        address receiverAddress
+    ) public onlyOwner {
+        s_tokenInfo[tokenId] = TokenInfo({
+            salesStartDate: salesStartDate,
+            salesExpirationDate: salesExpirationDate,
+            usdPrice: usdPrice,
+            uri: tokenUri,
+            receiverAddress: receiverAddress
+        }); 
+        
+        emit TokenInfoUpdated(tokenId, s_tokenInfo[tokenId]);
+    }
+    
+    /// @notice Updates only the metadata URI of a token
+    /// @dev Can be called by metadata operators or the owner
+    /// @param tokenId The ID of the token to update
+    /// @param tokenUri The new URI to set for the token
+    function modifyTokenURI(uint256 tokenId, string memory tokenUri) public onlyMetadataOperatorOrOwner {
+        s_tokenInfo[tokenId].uri = tokenUri;
+        emit TokenURIUpdated(tokenId, tokenUri);
+    }
+
+    /// @notice Sets operators who can manage token metadata
+    /// @dev Only the contract owner can set operators
+    /// @param operators Array of operator addresses to set
+    /// @param isOperator Array of boolean values indicating if each address is an operator
+    function setOperators(address[] memory operators, bool[] memory isOperator) public onlyOwner {
+        if (operators.length != isOperator.length) revert("Length mismatch");
+        for (uint i = 0; i < operators.length; i++) {
+            s_operators[operators[i]] = isOperator[i];
+        }
+
+        emit OperatorsStateChanged(operators, isOperator);  
+    }
+
+    function setRoyalty(uint256 tokenId, address royaltyRecipient, uint96 royaltyFee) public onlyOwner {
+        _setTokenRoyalty(tokenId, royaltyRecipient, royaltyFee);
     }
 }
+
